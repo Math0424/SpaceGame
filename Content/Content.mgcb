@@ -113,6 +113,12 @@
 /processorParam:DebugMode=Auto
 /build:Shaders/GroundShader.fx
 
+#begin Shaders/WorldShader.fx
+/importer:EffectImporter
+/processor:EffectProcessor
+/processorParam:DebugMode=Auto
+/build:Shaders/WorldShader.fx
+
 #begin Textures/1674776130385.jpg
 /importer:TextureImporter
 /processor:TextureProcessor

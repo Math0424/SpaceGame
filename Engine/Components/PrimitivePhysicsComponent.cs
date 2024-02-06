@@ -19,12 +19,6 @@ namespace Project1.Engine.Components
         Kinematic,
     }
 
-    public enum PhysicsLayer
-    {
-        Default,
-        Trigger,
-    }
-
     internal enum RigidBodyType
     {
         Sphere,
@@ -36,7 +30,6 @@ namespace Project1.Engine.Components
 
     internal class PrimitivePhysicsComponent : EntityComponent
     {
-        public PhysicsLayer PhysicsLayer;
         public bool IsEnabled;
         public bool IsSleeping => !_rigidBody.IsActive;
         public int EntityId => _entity.Id;
@@ -44,34 +37,34 @@ namespace Project1.Engine.Components
         private float _userRadius;
         private float _userMass;
 
+        private CollisionFilterGroups _physicsFilter;
         private RigidBodyType _type;
         private RigidBodyFlags _flags;
 
         private RigidBody _rigidBody;
 
-        /// <summary>
-        /// Entity intersecting with [entity] at [position]
-        /// </summary>
-        public Action<int, Vector3> Intersecting;
-        /// <summary>
-        /// Entity collided with [entity] at [position] [velocity] [normal] with [force]
-        /// </summary>
-        public Action<int, Vector3, Vector3, Vector3, float> Collision;
-
-        public PrimitivePhysicsComponent(RigidBodyType type)
+        public PrimitivePhysicsComponent(RigidBodyType type, CollisionFilterGroups layer = CollisionFilterGroups.AllFilter)
         {
+            _physicsFilter = layer;
             _type = type;
             _flags = RigidBodyFlags.Static;
             _userRadius = -1;
             _userMass = 0;
         }
 
-        public PrimitivePhysicsComponent(RigidBodyType type, RigidBodyFlags flags, float mass, float radius = -1)
+        public PrimitivePhysicsComponent(RigidBodyType type, RigidBodyFlags flags, float mass, float radius = -1, CollisionFilterGroups layer = CollisionFilterGroups.AllFilter)
         {
+            _physicsFilter = layer;
             _type = type;
             _flags = flags;
             _userMass = mass;
             _userRadius = radius;
+        }
+
+        public override void Close()
+        {
+            _entity.World.GetSystem<PhysicsSystem>().World.RemoveCollisionObject(_rigidBody);
+            _rigidBody.Dispose();
         }
 
         public override void Initalize()
@@ -130,7 +123,9 @@ namespace Project1.Engine.Components
                     _rigidBody = new RigidBody(bodyInfo);
                 }
             }
-            sim.AddRigidBody(_rigidBody);
+            _rigidBody.UserIndex = _entity.Id;
+
+            sim.AddRigidBody(_rigidBody, _physicsFilter, CollisionFilterGroups.AllFilter);
         }
 
         public void SetWorldMatrix(Matrix matrix)

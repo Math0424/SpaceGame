@@ -1,4 +1,4 @@
-﻿#define SPECTATOR
+﻿#define SPECTATORs
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
@@ -32,6 +32,7 @@ namespace Project1.MyGame
         private int _playersRemain;
 
         private Entity _currentPlayer;
+        private int _holeId;
 
         private GolfingGUI _gui;
 
@@ -107,8 +108,12 @@ namespace Project1.MyGame
 
             var worldLoader = _world.GetSystem<WorldLoadingSystem>();
             worldLoader.LoadWorld(_worlds[_currentWorld]);
+            _holeId = worldLoader.HoleId;
 
-            _world.GetEntity(worldLoader.HoleId).GetComponent<PrimitivePhysicsComponent>().Intersecting += HoleCollision;
+            var pysxSystem = _world.GetSystem<PhysicsSystem>();
+
+            pysxSystem.Collision += HoleCollision;
+            pysxSystem.Collision += ImpactSound;
 
             _players = new Entity[_playerCount];
             _playersRemain = _playerCount;
@@ -124,12 +129,11 @@ namespace Project1.MyGame
                 _players[i].Position.SetLocalMatrix(Matrix.CreateScale(.40f));
                 var phyx = _players[i].GetComponent<PrimitivePhysicsComponent>();
                 phyx.IsEnabled = false;
-                phyx.Collision += ImpactSound;
             }
             ActivateCurrentPlayer();
         }
 
-        public void ImpactSound(int ent, Vector3 pos, Vector3 velocity, Vector3 normal, float J)
+        public void ImpactSound(int aId, int bId, Vector3 pos, Vector3 normal, float J)
         {
             if (J > .15f)
                 _world.GetSystem<SoundSystem>().PlaySoundEffect("Audio/hit_wall");
@@ -161,13 +165,15 @@ namespace Project1.MyGame
 #endif
         }
 
-        private void HoleCollision(int id, Vector3 pos)
+        private void HoleCollision(int aId, int bId, Vector3 pos, Vector3 normal, float J)
         {
 #if !SPECTATOR
+            if (aId != _holeId) return;
+
             for(int i = 0; i < _playerCount; i++)
             {
                 Entity player = _players[i];
-                if (player.Id == id)
+                if (player.Id == bId)
                 {
                     player.Close();
                     _playersRemain--;

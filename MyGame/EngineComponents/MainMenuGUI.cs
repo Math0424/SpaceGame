@@ -15,23 +15,16 @@ namespace Project1.MyGame
     {
         public Action<string, int> StartGame;
 
-        private HudTextButton _startGameBtn;
+        private HudTextButton _btn2;
         private HudTextButton _sourceCodeBtn;
 
-        private HudTextButton _levelSelectBtn;
-        private HudTextButton _playerModeBtn;
-
-        private HudTextButton[] _levelSelectBtns;
-        private int _playerCount;
-
-        public MainMenuGUI(HudRoot root, string[] levels) : base(root)
+        public MainMenuGUI(HudRoot root) : base(root)
         {
             Visible = true;
-            _playerCount = 1;
 
             var text = new HudText(this)
             {
-                Text = "Golfing Game",
+                Text = "Space Game",
                 TextScale = 3,
                 TextColor = Color.White,
             };
@@ -46,63 +39,40 @@ namespace Project1.MyGame
             };
             _sourceCodeBtn.OnLeftClicked += (e) => { Process.Start("explorer", "https://github.com/Math0424/GolfingGame"); };
 
-            _startGameBtn = new HudTextButton(_sourceCodeBtn)
+            _btn2 = new HudTextButton(_sourceCodeBtn)
             {
                 Padding = 10,
-                Text = "Start Game",
+                Text = "Join Game",
                 Bounds = new Vector2I(200, 50),
                 ParentAlignment = ParentAlignments.Top | ParentAlignments.Padding
             };
-            _startGameBtn.OnLeftClicked += (e) =>
+            _btn2.OnLeftClicked += (e) =>
             {
-                StartGame?.Invoke(null, _playerCount);
-            };
-            
-            _levelSelectBtn = new HudTextButton(this)
-            {
-                Padding = 20,
-                Text = "Level Select",
-                Bounds = new Vector2I(200, 50),
-                ParentAlignment = ParentAlignments.Right | ParentAlignments.Bottom | ParentAlignments.Inner | ParentAlignments.Padding
-            };
-            _levelSelectBtn.OnLeftClicked += (e) =>
-            {
-                foreach(var x in _levelSelectBtns)
-                    x.Visible = !x.Visible;
+                //StartGame?.Invoke(null, _playerCount);
             };
 
-            _levelSelectBtns = new HudTextButton[levels.Length];
-            for(int i = 0; i < levels.Length; i++)
+            var _btn3 = new HudTextButton(_btn2)
             {
-                _levelSelectBtns[i] = new HudTextButton(_levelSelectBtn)
-                {
-                    Text = Path.GetFileNameWithoutExtension(levels[i]),
-                    Bounds = new Vector2I(100, 40),
-                    Visible = false,
-                    Padding = 10,
-                    ParentAlignment = ParentAlignments.Top | ParentAlignments.Right | ParentAlignments.InnerV | ParentAlignments.Padding,
-                };
-                _levelSelectBtns[i].Position -= new Vector2I(0, i * 50);
-                _levelSelectBtns[i].OnLeftClicked += (e) =>
-                {
-                    StartGame?.Invoke(((HudTextButton)e).Text, _playerCount);
-                };
-            }
-
-            _playerModeBtn = new HudTextButton(this)
-            {
-                Padding = 20,
-                Text = $"{_playerCount} Player(s)",
+                Padding = 10,
+                Text = "Create Lobby",
                 Bounds = new Vector2I(200, 50),
-                ParentAlignment = ParentAlignments.Left | ParentAlignments.Top | ParentAlignments.Inner | ParentAlignments.Padding
+                ParentAlignment = ParentAlignments.Top | ParentAlignments.Padding
             };
-            _playerModeBtn.OnLeftClicked += (e) => {
-                _playerCount += 1;
-                _playerModeBtn.Text = $"{_playerCount} Player(s)";
-            }; 
-            _playerModeBtn.OnRightClicked += (e) => {
-                _playerCount = Math.Max(1, _playerCount - 1);
-                _playerModeBtn.Text = $"{_playerCount} Player(s)";
+            _btn2.OnLeftClicked += (e) =>
+            {
+                //StartGame?.Invoke(null, _playerCount);
+            };
+
+            var _btn4 = new HudTextButton(_btn3)
+            {
+                Padding = 10,
+                Text = "Start Singleplayer",
+                Bounds = new Vector2I(200, 50),
+                ParentAlignment = ParentAlignments.Top | ParentAlignments.Padding
+            };
+            _btn2.OnLeftClicked += (e) =>
+            {
+                //StartGame?.Invoke(null, _playerCount);
             };
 
         }

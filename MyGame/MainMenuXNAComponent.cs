@@ -36,8 +36,7 @@ namespace Project1.MyGame
         {
             var hud = _world.GetSystem<HudSystem>();
 
-            string[] worlds = Directory.GetFiles(Path.Combine(Game.Content.RootDirectory, "worlds"));
-            var menu = new MainMenuGUI(hud.Root, worlds);
+            var menu = new MainMenuGUI(hud.Root);
             menu.StartGame += StartGame;
 
             _world.CreateEntity()

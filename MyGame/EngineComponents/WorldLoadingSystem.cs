@@ -55,8 +55,7 @@ namespace Project1.MyGame
                 case "hole":
                     var hole = _world.CreateEntity()
                         .AddComponent(new PositionComponent(worldMatrix))
-                        .AddComponent(new PrimitivePhysicsComponent(RigidBodyType.Box));
-                    hole.GetComponent<PrimitivePhysicsComponent>().PhysicsLayer = PhysicsLayer.Trigger;
+                        .AddComponent(new PrimitivePhysicsComponent(RigidBodyType.Box, BulletSharp.CollisionFilterGroups.SensorTrigger));
                     HoleId = hole.Id;
                     break;
                 case "box":

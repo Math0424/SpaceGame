@@ -20,6 +20,10 @@ namespace Project1.Engine.Systems
     internal class PhysicsSystem : SystemComponent
     {
         public DiscreteDynamicsWorld World;
+        /// <summary>
+        /// [ent] collided with [ent] at [pos] with [normal] and [force]
+        /// </summary>
+        public Action<int, int, Vector3, Vector3, float> Collision;
 
         private World _world;
         private double _accumulatedTime;
@@ -51,7 +55,7 @@ namespace Project1.Engine.Systems
             _dispatcher = new CollisionDispatcher(_collisionConfiguration);
             _broadphase = new DbvtBroadphase();
             World = new DiscreteDynamicsWorld(_dispatcher, _broadphase, null, _collisionConfiguration);
-            World.Gravity = new BulletSharp.Math.Vector3(0, -9.8, 0);
+            //World.Gravity = new BulletSharp.Math.Vector3(0, -9.8, 0); - no gravity in space
         }
 
         public void DebugDraw()
@@ -87,6 +91,16 @@ namespace Project1.Engine.Systems
             foreach (var x in physicsObjects)
                 if (x.EntityId != -1)
                     x.UpdateWorldMatrix();
+
+            for (int i = 0; i < World.Dispatcher.NumManifolds; i++)
+            {
+                PersistentManifold contactManifold = World.Dispatcher.GetManifoldByIndexInternal(i);
+                CollisionObject obA = contactManifold.Body0;
+                CollisionObject obB = contactManifold.Body1;
+                
+                ManifoldPoint pt = contactManifold.GetContactPoint(0);
+                Collision?.Invoke(obA.UserIndex, obB.UserIndex, pt.PositionWorldOnA.ToXNA(), pt.NormalWorldOnB.ToXNA(), (float)pt.AppliedImpulse);
+            }
 
         }
     }
