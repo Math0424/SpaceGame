@@ -15,7 +15,6 @@ namespace Project1
     public class GolfGame : Game
     {
         private MainMenuXNAComponent _mainMenu;
-        private GolfingGameXNAComponent _golfGame;
 
         public GolfGame()
         {
@@ -39,23 +38,17 @@ namespace Project1
             _mainMenu.Dispose();
             _mainMenu = null;
 
-            _golfGame = new GolfingGameXNAComponent(this, worldName, playerCount);
-            _golfGame.InvokeMainMenu += LoadIntoMainMenu;
-            Components.Add(_golfGame);
         }
         
         public void LoadIntoMainMenu()
         {
-            _golfGame.Dispose();
-            Components.Remove(_golfGame);
-            _golfGame = null;
 
             LoadMainMenu();
         }
 
         protected override void Update(GameTime gameTime)
         {
-            if (_golfGame == null && Input.IsNewKeyDown(Keys.Escape))
+            if (Input.IsNewKeyDown(Keys.Escape))
                 Exit();
 
             base.Update(gameTime);

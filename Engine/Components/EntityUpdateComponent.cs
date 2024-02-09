@@ -9,6 +9,13 @@ namespace Project1.Engine.Components
 {
     internal abstract class EntityUpdateComponent : EntityComponent
     {
+        public bool IsActive;
+        public virtual void UpdateInternal(GameTime deltaTime)
+        {
+            if (IsActive)
+                Update(deltaTime);
+        }
+
         public abstract void Update(GameTime deltaTime);
     }
 }

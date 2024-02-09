@@ -42,7 +42,7 @@ namespace Project1.MyGame
             _world.CreateEntity()
                 .AddComponent(new PositionComponent(Matrix.Identity, Matrix.CreateScale(0.01f)))
                 .AddComponent(new PrimitivePhysicsComponent(RigidBodyType.Sphere, Engine.Components.RigidBodyFlags.Dynamic, 10))
-                .AddComponent(new SpaceshipController(Matrix.CreateTranslation(new Vector3(0, 0.3f, 0.9f))))
+                .AddComponent(new SpaceshipController(Matrix.CreateTranslation(new Vector3(0, 0.4f, 0.7f))))
                 .AddComponent(new MeshComponent("Models/Cockpit"));//, "Textures/Shotgun/shotgun_CM", "Textures/Shotgun/shotgun_ADD"));
 
         }

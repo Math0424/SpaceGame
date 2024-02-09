@@ -12,8 +12,10 @@ namespace Project2.MyGame.EngineComponents
 {
     internal class SpaceshipController : EntityUpdateComponent
     {
-        public bool CaptureCursor;
-
+        private float yaw = 0, pitch = 0;
+        private bool _shipRotation;
+        private bool _cameraRotation;
+        
         private PrimitivePhysicsComponent _physics;
         private Matrix _localCameraPos;
         private int _justFocused;
@@ -22,13 +24,17 @@ namespace Project2.MyGame.EngineComponents
 
         public SpaceshipController(Matrix localCameraMatrix)
         {
-            CaptureCursor = true;
-            _localCameraPos = localCameraMatrix;
+            IsActive = true;
+            _shipRotation = true;
+            _cameraRotation = false;
+           _localCameraPos = localCameraMatrix;
         }
 
         private void CenterCursor()
         {
             _justFocused = 5;
+            var bounds = _entity.World.Game.GraphicsDevice.Viewport.Bounds;
+            Mouse.SetPosition(bounds.Width / 2, bounds.Height / 2);
         }
 
         public override void Initalize()
@@ -43,7 +49,12 @@ namespace Project2.MyGame.EngineComponents
             var pos = _entity.Position;
             var cam = _entity.World.Render.Camera;
 
-            cam.SetWorldMatrix(_localCameraPos * pos.WorldMatrix);
+            Quaternion rot = Quaternion.CreateFromYawPitchRoll(yaw, pitch, 0);
+            Quaternion cRot;
+            Vector3 cPos;
+            (_localCameraPos * pos.WorldMatrix).Decompose(out _, out cRot, out cPos);
+
+            cam.SetWorldMatrix(Matrix.CreateFromQuaternion(cRot * rot) * Matrix.CreateTranslation(cPos));
 
             if (!_entity.World.Game.IsActive || _justFocused > 0)
             {
@@ -51,7 +62,7 @@ namespace Project2.MyGame.EngineComponents
                 return;
             }
 
-            if (CaptureCursor)
+            if (_shipRotation)
             {
                 var bounds = _entity.World.Game.GraphicsDevice.Viewport.Bounds;
                 var mousePos = Mouse.GetState().Position;
@@ -64,6 +75,39 @@ namespace Project2.MyGame.EngineComponents
                 _physics.AddTorque(pos.WorldMatrix.Down * xdelta * delta * ROTATION_SPEED);
             }
 
+            if (_cameraRotation)
+            {
+                var bounds = _entity.World.Game.GraphicsDevice.Viewport.Bounds;
+                var mousePos = Mouse.GetState().Position;
+                float xdelta = (mousePos.X - (bounds.Width / 2)) * delta * 0.1f;
+                float ydelta = (mousePos.Y - (bounds.Height / 2)) * delta * 0.1f;
+
+                Mouse.SetPosition(bounds.Width / 2, bounds.Height / 2);
+
+                yaw -= xdelta;
+                pitch -= ydelta;
+
+                yaw = Math.Clamp(yaw, -1.5f, 1.5f);
+                pitch = Math.Clamp(pitch, -1.5f, 1.5f);
+            }
+
+            if (Input.IsMouseDown(Input.MouseButtons.RightButton))
+            {
+                _shipRotation = false;
+                _cameraRotation = true;
+                if (Input.IsNewMouseDown(Input.MouseButtons.RightButton))
+                {
+                    yaw = 0;
+                    pitch = 0;
+                }
+            } 
+            else
+            {
+                _shipRotation = true;
+                _cameraRotation = false;
+                yaw /= 1 + (delta * 20);
+                pitch /= 1 + (delta * 20);
+            }
 
             if (Input.IsKeyDown(Keys.W))
                 _physics.AddForce(pos.WorldMatrix.Forward * delta * ACCELERATION_SPEED);
