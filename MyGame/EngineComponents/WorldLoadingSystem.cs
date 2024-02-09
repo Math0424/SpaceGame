@@ -61,7 +61,7 @@ namespace Project1.MyGame
                 case "box":
                     _world.CreateEntity()
                         .AddComponent(new PositionComponent(worldMatrix))
-                        .AddComponent(new MeshComponent("Models/Cube", "Shaders/GroundShader"))
+                        .AddComponent(new MeshComponent("Models/Cube"))
                         .AddComponent(new PrimitivePhysicsComponent(RigidBodyType.Box));
                     break;
                 case "sphere":

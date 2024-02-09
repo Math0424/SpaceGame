@@ -55,7 +55,7 @@ namespace Project1.Engine.Systems
             _dispatcher = new CollisionDispatcher(_collisionConfiguration);
             _broadphase = new DbvtBroadphase();
             World = new DiscreteDynamicsWorld(_dispatcher, _broadphase, null, _collisionConfiguration);
-            //World.Gravity = new BulletSharp.Math.Vector3(0, -9.8, 0); - no gravity in space
+            World.Gravity = new BulletSharp.Math.Vector3(0, 0, 0);
         }
 
         public void DebugDraw()

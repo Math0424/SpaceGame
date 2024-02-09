@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 
 namespace Project1.Engine.Systems
 {
+
     internal class RenderingSystem : SystemComponent, IDrawUpdate
     {
         public static GraphicsDeviceManager _graphics;
@@ -24,7 +25,6 @@ namespace Project1.Engine.Systems
 
         private GraphicsDevice _graphicsDevice;
         private BasicEffect _basicEffect;
-        private SpriteFont _font;
         private SpriteBatch _debugSpriteBatch;
         private SpriteBatch _spriteBatch;
         private SpriteEffect _spriteEffect;
@@ -36,6 +36,13 @@ namespace Project1.Engine.Systems
 
         private List<RenderMessage> _renderMessages;
 
+        private string _skyboxTexture;
+
+        public void SetSkybox(string skyboxTexture)
+        {
+            _skyboxTexture = skyboxTexture;
+        }
+
         public RenderingSystem(World world, Game game, Camera camera)
         {
             _game = game;
@@ -45,9 +52,9 @@ namespace Project1.Engine.Systems
             GraphicsReady = false;
             _renderMessages = new List<RenderMessage>();
             _meshes = new Dictionary<string, Model>();
-            _fonts = new Dictionary<string, SpriteFont>();
             _textures = new Dictionary<string, Texture2D>();
             _effects = new Dictionary<string, Effect>();
+            _fonts = new Dictionary<string, SpriteFont>();
 
             if (_graphics == null)
             {
@@ -74,15 +81,16 @@ namespace Project1.Engine.Systems
             _spriteBatch = new SpriteBatch(_graphicsDevice);
             _debugSpriteBatch = new SpriteBatch(_graphicsDevice);
 
-            //_basicEffect.EnableDefaultLighting();
+            _basicEffect.EnableDefaultLighting();
             _basicEffect.LightingEnabled = true;
             _basicEffect.AmbientLightColor = Vector3.One;
 
             _spriteEffect = new SpriteEffect(_graphicsDevice);
 
-            _font = _world.Game.Content.Load<SpriteFont>("Fonts/Debug");
             EnqueueMessage(new RenderMessageLoadFont("Fonts/Debug"));
             EnqueueMessage(new RenderMessageLoadMesh("Models/DebugSphere"));
+            EnqueueMessage(new RenderMessageLoadEffect("Shaders/WorldShader"));
+            EnqueueMessage(new RenderMessageLoadEffect("Shaders/Skybox"));
 
             ScreenBounds = new Vector2I(_graphicsDevice.Viewport.Width, _graphicsDevice.Viewport.Height);
             Camera.SetupProjection(_graphicsDevice.Viewport.Width, _graphicsDevice.Viewport.Height, 90);
@@ -120,6 +128,7 @@ namespace Project1.Engine.Systems
                 }
             }
 
+
             int renderMessageCount = _renderMessages.Count;
             ProcessRenderMessages();
             _renderMessages.Clear();
@@ -130,7 +139,7 @@ namespace Project1.Engine.Systems
 
                 long ticksTaken = (DateTime.Now.Ticks - timeNow) / 10000;
                 
-                _debugSpriteBatch.DrawString(_font, $"Rendering Debug:\n" +
+                _debugSpriteBatch.DrawString(_fonts["Fonts/Debug"], $"Rendering Debug:\n" +
                     $"Time: {Math.Round(delta.TotalGameTime.TotalMilliseconds / 1000, 2)}s\n" +
                     $"FPS: {Math.Round(delta.ElapsedGameTime.TotalSeconds * 1000, 2)}ms {Math.Round((ticksTaken / delta.ElapsedGameTime.TotalMilliseconds) * 100)}%\n" +
                     $"TPS: {Math.Round(tickTime.ElapsedGameTime.TotalSeconds * 1000, 2)}ms\n" +
@@ -210,24 +219,40 @@ namespace Project1.Engine.Systems
                         var loadEffect = (RenderMessageLoadEffect)message;
                         _effects[loadEffect.Effect] = _game.Content.Load<Effect>(loadEffect.Effect);
                         break;
-                    case RenderMessageType.DrawMesh:
-                        var drawMesh = (RenderMessageDrawMesh)message;
-                        _basicEffect.VertexColorEnabled = false;
-                        _basicEffect.TextureEnabled = true;
-                        _meshes[drawMesh.Model].Draw(drawMesh.Matrix, Camera.ViewMatrix, Camera.ProjectionMatrix);
+                    case RenderMessageType.DrawBasicMesh:
+                        var drawBasicMesh = (RenderMessageDrawMesh)message;
+                        foreach (ModelMesh mesh in _meshes[drawBasicMesh.Model].Meshes)
+                        {
+                            foreach (ModelMeshPart part in mesh.MeshParts)
+                            {
+                                Matrix model = mesh.ParentBone.Transform * drawBasicMesh.Matrix;
+                                part.Effect = _basicEffect;
+                                _basicEffect.World = model;
+                            }
+                            mesh.Draw();
+                        }
                         break;
-                    case RenderMessageType.DrawMeshWithEffect:
-                        var drawEffectMesh = (RenderMessageDrawMeshWithEffect)message;
-                        var effect = _effects[drawEffectMesh.Effect];
+                    case RenderMessageType.DrawMesh:
+                        var drawEffectMesh = (RenderMessageDrawTexturedMesh)message;
+                        var effect = _effects["Shaders/WorldShader"];
+                        effect.Parameters["ViewDir"].SetValue(Camera.WorldMatrix.Forward);
+                        effect.Parameters["DiffuseDirection"].SetValue(Vector3.Down);
+                        effect.Parameters["DiffuseColor"].SetValue(new Vector3(255 / 255f, 247 / 255f, 166 / 255f));
+                        effect.Parameters["DiffuseIntensity"].SetValue(0.8f);
+                        effect.Parameters["AmbientColor"].SetValue(new Vector3(1, 1, 1));
+                        effect.Parameters["AmbientIntensity"].SetValue(0.1f);
+
+                        effect.Parameters["Texture_CM"].SetValue(_textures[drawEffectMesh.Texture_CM]);
+                        effect.Parameters["Texture_ADD"].SetValue(_textures[drawEffectMesh.Texture_ADD]);
                         foreach (ModelMesh mesh in _meshes[drawEffectMesh.Model].Meshes)
                         {
                             foreach (ModelMeshPart part in mesh.MeshParts)
                             {
                                 part.Effect = effect;
-                                effect.Parameters["World"].SetValue(drawEffectMesh.Matrix * mesh.ParentBone.Transform);
-                                effect.Parameters["CameraPos"].SetValue(Camera.WorldMatrix.Translation);
-                                effect.Parameters["View"].SetValue(Camera.ViewMatrix);
-                                effect.Parameters["Projection"].SetValue(Camera.ProjectionMatrix);
+                                Matrix model = drawEffectMesh.Matrix * mesh.ParentBone.Transform;
+                                effect.Parameters["WorldViewProjection"].SetValue(model * Camera.ViewMatrix * Camera.ProjectionMatrix);
+                                effect.Parameters["WorldInverseTranspose"].SetValue(Matrix.Transpose(Matrix.Invert(model)));
+                                effect.Parameters["WorldMatrix"].SetValue(model);
                             }
                             mesh.Draw();
                         }

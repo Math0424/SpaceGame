@@ -11,13 +11,24 @@ using System.Threading.Tasks;
 
 namespace Project1.Engine.Components
 {
+    enum RenderType
+    {
+        Vertex,
+        ColorMap,
+        ColorMapAdd,
+    }
+
     struct ModelInfo
     {
         public Model Model;
+        public RenderType RenderType;
+        public string Texture_CM;
+        public string Texture_ADD;
+
         public string Name;
         public int Verticies;
-        public BoundingBox BoundingBox;
-        public Vector3 ModelCenter;
+        public BoundingBox BB;
+        public Vector3 Center;
         public float BoundingSphereRadius;
     }
 
@@ -28,27 +39,24 @@ namespace Project1.Engine.Components
 
         public ref ModelInfo Model => ref _info;
         public BoundingBox AABB => _AABB;
-        public string ModelName
-        {
-            get => _info.Name;
-            set => SetModel(value);
-        }
 
         private ModelInfo _info;
-        private string _modelName;
-        private string _effect;
         private BoundingBox _AABB;
 
-        public MeshComponent(string modelname, string effect = null)
+        public MeshComponent(string modelname, string texture_cm = null, string texture_add = null)
         {
-            _effect = effect;
-            _modelName = modelname;
+            _info = new ModelInfo()
+            {
+                Name = modelname,
+                Texture_CM = texture_cm,
+                Texture_ADD = texture_add,
+            };
         }
 
         private void UpdateAABB()
         {
             var m = _entity.Position.WorldMatrix;
-            BoundingBox bb = Model.BoundingBox;
+            BoundingBox bb = Model.BB;
             for (int i = 0; i < 3; i++)
             {
                 for(int j = 0; j < 3; j++)
@@ -74,11 +82,14 @@ namespace Project1.Engine.Components
 
         public override void Initalize()
         {
-            if (_effect != null)
-                _entity.World.Render.EnqueueMessage(new RenderMessageLoadEffect(_effect));
-            _entity.World.Render.EnqueueMessage(new RenderMessageLoadMesh(_modelName));
+            if (_info.Texture_ADD != null)
+                _entity.World.Render.EnqueueMessage(new RenderMessageLoadTexture(_info.Texture_ADD));
+            if (_info.Texture_CM != null)
+                _entity.World.Render.EnqueueMessage(new RenderMessageLoadTexture(_info.Texture_CM));
+
+            _entity.World.Render.EnqueueMessage(new RenderMessageLoadMesh(_info.Name));
             _entity.Position.UpdatedTransforms += UpdateAABB;
-            SetModel(_modelName);
+            SetModel(_info.Name);
         }
 
         public override void Close()
@@ -90,30 +101,34 @@ namespace Project1.Engine.Components
         {
             Matrix lm = _entity.Position.TransformMatrix;
             Vector3 boundingSphere = Vector3.Transform(new Vector3(_info.BoundingSphereRadius), lm);
-            float scale = boundingSphere.Length();//Math.Max(lm.Forward.Length(), Math.Max(lm.Up.Length(), lm.Right.Length()));
+            float scale = boundingSphere.Length();
             return cam.Frustum.Intersects(new BoundingSphere(_entity.Position.Position, _info.BoundingSphereRadius * scale));
         }
 
         public override void Draw(RenderingSystem rendering, ref Camera cam)
         {
-            if (_effect != null)
-                rendering.EnqueueMessage(new RenderMessageDrawMeshWithEffect(_modelName, _entity.Position.TransformMatrix, _effect));
-            else
-                rendering.EnqueueMessage(new RenderMessageDrawMesh(_modelName, _entity.Position.TransformMatrix));
+            if (_info.Texture_CM == null && _info.Texture_ADD == null)
+            {
+                rendering.EnqueueMessage(new RenderMessageDrawMesh(_info.Name, _entity.Position.TransformMatrix));
+                return;
+            }
+            rendering.EnqueueMessage(new RenderMessageDrawTexturedMesh(_info.Name, _info.Texture_CM, _info.Texture_ADD, _entity.Position.TransformMatrix));
         }
 
         private void SetModel(string name)
         {
-            _info.Name = name;
             if (cache.ContainsKey(name))
             {
                 _info = cache[name];
                 return;
             }
+            ModelInfo modelInfo;
             Model model = _entity.World.Game.Content.Load<Model>(name);
-            CalculateModelInfo(model, out _info);
-
-            cache[name] = _info;
+            CalculateModelInfo(model, out modelInfo);
+            
+            modelInfo.Name = name;
+            cache[name] = modelInfo;
+            _info = modelInfo;
         }
 
         private void CalculateModelInfo(Model model, out ModelInfo info)
@@ -122,27 +137,33 @@ namespace Project1.Engine.Components
             int verticies = 0;
             foreach(var mesh in model.Meshes)
             {
-                foreach (var part in mesh.MeshParts)
-                    verticies += part.NumVertices;
-
-                int vertexStride = mesh.MeshParts[0].VertexBuffer.VertexDeclaration.VertexStride;
-                float[] vertexData = new float[verticies * vertexStride / sizeof(float)];
-                mesh.MeshParts[0].VertexBuffer.GetData(vertexData);
-
-                for (int i = 0; i < vertexData.Length; i += vertexStride / sizeof(float))
+                foreach (ModelMeshPart meshPart in mesh.MeshParts)
                 {
-                    Vector3 pos = new Vector3(vertexData[i], vertexData[i + 1], vertexData[i + 2]);
-                    min = Vector3.Min(min, pos);
-                    max = Vector3.Max(max, pos);
+                    int vertexStride = meshPart.VertexBuffer.VertexDeclaration.VertexStride;
+                    int vertexBufferSize = meshPart.NumVertices * vertexStride;
+
+                    int vertexDataSize = vertexBufferSize / sizeof(float);
+                    float[] vertexData = new float[vertexDataSize];
+                    meshPart.VertexBuffer.GetData<float>(vertexData);
+
+                    for (int i = 0; i < vertexDataSize; i += vertexStride / sizeof(float))
+                    {
+                        Vector3 vertex = new Vector3(vertexData[i], vertexData[i + 1], vertexData[i + 2]);
+                        min = Vector3.Min(min, vertex);
+                        max = Vector3.Max(max, vertex);
+                    }
                 }
             }
 
             info = new ModelInfo()
             {
+                Name = _info.Name,
+                Texture_ADD = _info.Texture_ADD,
+                Texture_CM = _info.Texture_CM,
                 Model = model,
                 Verticies = verticies,
-                ModelCenter = (min + max) / 2,
-                BoundingBox = new BoundingBox(min, max),
+                Center = (min + max) / 2,
+                BB = new BoundingBox(min, max),
                 BoundingSphereRadius = Vector3.Distance(min, max),
             };
         }

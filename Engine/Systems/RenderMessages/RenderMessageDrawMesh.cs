@@ -12,7 +12,7 @@ namespace Project1.Engine.Systems.RenderMessages
     {
         public string Model { get; private set; }
         public Matrix Matrix { get; private set; }
-        public RenderMessageDrawMesh(string model, Matrix transformMatrix) : base(RenderMessageType.DrawMesh)
+        public RenderMessageDrawMesh(string model, Matrix transformMatrix) : base(RenderMessageType.DrawBasicMesh)
         {
             this.Model = model;
             this.Matrix = transformMatrix;

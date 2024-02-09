@@ -104,8 +104,6 @@ namespace Project1.Engine.Components
             {
                 using (var bodyInfo = new RigidBodyConstructionInfo(0, null, shape)
                 {
-                    AngularDamping = 0.5,
-                    LinearDamping = 0.1,
                     StartWorldTransform = transform.ToBullet(),
                 })
                 {
@@ -116,8 +114,10 @@ namespace Project1.Engine.Components
             {
                 using (var bodyInfo = new RigidBodyConstructionInfo(_userMass, new DefaultMotionState(transform.ToBullet()), shape, shape.CalculateLocalInertia(_userMass))
                 {
-                    AngularDamping = 0.5,
-                    LinearDamping = 0.1,
+                    AngularDamping = 0.05,
+                    LinearDamping = 0.01,
+                    AngularSleepingThreshold = 0.01,
+                    LinearSleepingThreshold = 0.01,
                 })
                 {
                     _rigidBody = new RigidBody(bodyInfo);
@@ -166,7 +166,7 @@ namespace Project1.Engine.Components
         public void DebugDraw(RenderingSystem render)
         {
             var pos = _entity.Position;
-            
+
             DrawingUtils.DrawMatrix(render, pos.WorldMatrix);
 
             BulletSharp.Math.Vector3 bMin;
