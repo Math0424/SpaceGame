@@ -43,6 +43,8 @@ namespace Project1.Engine.Components
         private ModelInfo _info;
         private BoundingBox _AABB;
 
+        public ref float BoundingSphere => ref _info.BoundingSphereRadius;
+
         public MeshComponent(string modelname, string texture_cm = null, string texture_add = null)
         {
             _info = new ModelInfo()
@@ -55,7 +57,7 @@ namespace Project1.Engine.Components
 
         private void UpdateAABB()
         {
-            var m = _entity.Position.WorldMatrix;
+            var m = _entity.Position.TransformMatrix;
             BoundingBox bb = Model.BB;
             for (int i = 0; i < 3; i++)
             {
@@ -90,19 +92,31 @@ namespace Project1.Engine.Components
             _entity.World.Render.EnqueueMessage(new RenderMessageLoadMesh(_info.Name));
             _entity.Position.UpdatedTransforms += UpdateAABB;
             SetModel(_info.Name);
+
+            // _entity.World.Render.DoDebugDraw += DebugDraw;
+        }
+
+        private void DebugDraw()
+        {
+            BoundingBox bb = _AABB;
+            Vector3 pos = (bb.Max + bb.Min) / 2;
+            Vector3 halfExtents = (bb.Max - bb.Min) / 2;
+            Matrix mat = Matrix.CreateScale(halfExtents) * Matrix.CreateTranslation(pos);
+            _entity.World.Render.EnqueueMessage(new RenderMessageDrawBox(mat));
         }
 
         public override void Close()
         {
             _entity.Position.UpdatedTransforms -= UpdateAABB;
+            // _entity.World.Render.DoDebugDraw -= DebugDraw;
         }
 
         public override bool IsVisible(ref Camera cam)
         {
-            Matrix lm = _entity.Position.TransformMatrix;
-            Vector3 boundingSphere = Vector3.Transform(new Vector3(_info.BoundingSphereRadius), lm);
-            float scale = boundingSphere.Length();
-            return cam.Frustum.Intersects(new BoundingSphere(_entity.Position.Position, _info.BoundingSphereRadius * scale));
+            Matrix lm = _entity.Position.WorldMatrix;
+            Vector3 extents = lm.HalfExtents();
+            float scale = _info.BoundingSphereRadius * Math.Max(extents.X, Math.Max(extents.Y, extents.Z));
+            return cam.Frustum.Intersects(new BoundingSphere(_entity.Position.Position, scale));
         }
 
         public override void Draw(RenderingSystem rendering, ref Camera cam)

@@ -42,7 +42,7 @@ namespace Project1.Engine.Systems
             _height = 480;
             _width = 800;
             _nearPlane = 0.1f;
-            _farPlane = 100f;
+            _farPlane = 1000f;
             SetViewMatrix(Matrix.CreateLookAt(new Vector3(0, 0, 10), new Vector3(0, 0, 0), Vector3.UnitY));
             SetupProjection(_width, _height, 1);
         }

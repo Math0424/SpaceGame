@@ -30,9 +30,11 @@ namespace Project1.Engine.Components
 
     internal class PrimitivePhysicsComponent : EntityComponent
     {
-        public bool IsEnabled;
         public bool IsSleeping => !_rigidBody.IsActive;
         public int EntityId => _entity.Id;
+
+        public Vector3 LinearVelocity => _rigidBody.LinearVelocity.ToXNA();
+        public Vector3 AngularVelocity => _rigidBody.AngularVelocity.ToXNA();
 
         private float _userRadius;
         private float _userMass;

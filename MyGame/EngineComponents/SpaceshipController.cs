@@ -14,19 +14,21 @@ namespace Project2.MyGame.EngineComponents
     {
         private float yaw = 0, pitch = 0;
         private bool _shipRotation;
-        private bool _cameraRotation;
+        private bool _shotgunControl;
         
         private PrimitivePhysicsComponent _physics;
         private Matrix _localCameraPos;
         private int _justFocused;
-        private const float ROTATION_SPEED = 6;
-        private const float ACCELERATION_SPEED = 6;
+
+        private const float DAMPENING_SPEED = 0.1f;
+        private const float ROTATION_SPEED = 10;
+        private const float ACCELERATION_SPEED = 20;
 
         public SpaceshipController(Matrix localCameraMatrix)
         {
             IsActive = true;
             _shipRotation = true;
-            _cameraRotation = false;
+            _shotgunControl = false;
            _localCameraPos = localCameraMatrix;
         }
 
@@ -54,7 +56,9 @@ namespace Project2.MyGame.EngineComponents
             Vector3 cPos;
             (_localCameraPos * pos.WorldMatrix).Decompose(out _, out cRot, out cPos);
 
-            cam.SetWorldMatrix(Matrix.CreateFromQuaternion(cRot * rot) * Matrix.CreateTranslation(cPos));
+            // the camera is one frame behind, just translate it forward by one frame
+            // this can be fixed, but I dont want to go though the pain
+            cam.SetWorldMatrix(Matrix.CreateFromQuaternion(cRot * rot) * Matrix.CreateTranslation(cPos + (_physics.LinearVelocity * delta)));
 
             if (!_entity.World.Game.IsActive || _justFocused > 0)
             {
@@ -75,7 +79,7 @@ namespace Project2.MyGame.EngineComponents
                 _physics.AddTorque(pos.WorldMatrix.Down * xdelta * delta * ROTATION_SPEED);
             }
 
-            if (_cameraRotation)
+            if (_shotgunControl)
             {
                 var bounds = _entity.World.Game.GraphicsDevice.Viewport.Bounds;
                 var mousePos = Mouse.GetState().Position;
@@ -88,13 +92,18 @@ namespace Project2.MyGame.EngineComponents
                 pitch -= ydelta;
 
                 yaw = Math.Clamp(yaw, -1.5f, 1.5f);
-                pitch = Math.Clamp(pitch, -1.5f, 1.5f);
+                pitch = Math.Clamp(pitch, -0.4f, 1.5f);
+
+                if (Input.IsNewMouseDown(Input.MouseButtons.LeftButton))
+                {
+                    _physics.AddImpulse(cam.Backward * 4, new Vector3(0, 0.5f, 0));
+                }
             }
 
             if (Input.IsMouseDown(Input.MouseButtons.RightButton))
             {
                 _shipRotation = false;
-                _cameraRotation = true;
+                _shotgunControl = true;
                 if (Input.IsNewMouseDown(Input.MouseButtons.RightButton))
                 {
                     yaw = 0;
@@ -104,30 +113,38 @@ namespace Project2.MyGame.EngineComponents
             else
             {
                 _shipRotation = true;
-                _cameraRotation = false;
+                _shotgunControl = false;
                 yaw /= 1 + (delta * 20);
                 pitch /= 1 + (delta * 20);
             }
 
+
+            Vector3 addedForce = Vector3.Zero;
             if (Input.IsKeyDown(Keys.W))
-                _physics.AddForce(pos.WorldMatrix.Forward * delta * ACCELERATION_SPEED);
+                addedForce += (pos.WorldMatrix.Forward * delta * ACCELERATION_SPEED);
             if (Input.IsKeyDown(Keys.S))
-                _physics.AddForce(pos.WorldMatrix.Backward * delta * ACCELERATION_SPEED);
+                addedForce += (pos.WorldMatrix.Backward * delta * ACCELERATION_SPEED);
             if (Input.IsKeyDown(Keys.A))
-                _physics.AddForce(pos.WorldMatrix.Left * delta * ACCELERATION_SPEED);
+                addedForce += (pos.WorldMatrix.Left * delta * ACCELERATION_SPEED);
             if (Input.IsKeyDown(Keys.D))
-                _physics.AddForce(pos.WorldMatrix.Right * delta * ACCELERATION_SPEED);
+                addedForce += (pos.WorldMatrix.Right * delta * ACCELERATION_SPEED);
 
             if (Input.IsKeyDown(Keys.Space))
-                _physics.AddForce(pos.WorldMatrix.Up * delta * ACCELERATION_SPEED);
+                addedForce += (pos.WorldMatrix.Up * delta * ACCELERATION_SPEED);
             if (Input.IsKeyDown(Keys.C))
-                _physics.AddForce(pos.WorldMatrix.Down * delta * ACCELERATION_SPEED);
+                addedForce += (pos.WorldMatrix.Down * delta * ACCELERATION_SPEED);
 
             if (Input.IsKeyDown(Keys.E))
                 _physics.AddTorque(pos.WorldMatrix.Forward * delta * ROTATION_SPEED);
             if (Input.IsKeyDown(Keys.Q))
                 _physics.AddTorque(pos.WorldMatrix.Backward * delta * ROTATION_SPEED);
 
+            if (addedForce.LengthSquared() == 0)
+                _physics.AddForce(-_physics.LinearVelocity * DAMPENING_SPEED);
+            else
+                _physics.AddForce(addedForce);
+
+            _physics.AddTorque(-_physics.AngularVelocity * DAMPENING_SPEED);
         }
 
         public override void Close()

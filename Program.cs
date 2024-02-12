@@ -1,1 +1,1 @@
-﻿new Project1.GolfGame().Run();
+﻿new Project1.SpaceGame().Run();

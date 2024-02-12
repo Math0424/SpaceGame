@@ -12,11 +12,11 @@ using System.IO;
 
 namespace Project1
 {
-    public class GolfGame : Game
+    public class SpaceGame : Game
     {
         private MainMenuXNAComponent _mainMenu;
 
-        public GolfGame()
+        public SpaceGame()
         {
             Content.RootDirectory = "Content";
             //Window.AllowUserResizing = true;

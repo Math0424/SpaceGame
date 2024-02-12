@@ -20,6 +20,7 @@ namespace Project1.Engine.Systems
         public Camera Camera { get; private set; }
         public Vector2I ScreenBounds { get; private set; }
         public Action DoDraw;
+        public Action DoDebugDraw;
         public Action OnGraphicsReady;
         public bool GraphicsReady;
 
@@ -60,9 +61,13 @@ namespace Project1.Engine.Systems
             {
                 _graphics = new GraphicsDeviceManager(game);
                 _graphics.DeviceCreated += GraphicInit;
-                _graphics.PreferredBackBufferHeight = 800;
-                _graphics.PreferredBackBufferWidth = 800;
-            } 
+
+                var monitor = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode;
+                _graphics.PreferredBackBufferHeight = monitor.Height;
+                _graphics.PreferredBackBufferWidth = monitor.Width;
+                _graphics.HardwareModeSwitch = false;
+                _graphics.IsFullScreen = true;
+            }
             else
                 GraphicInit(_graphics, null);
 
@@ -128,6 +133,8 @@ namespace Project1.Engine.Systems
                 }
             }
 
+            if (_debugMode)
+                DoDebugDraw?.Invoke();
 
             int renderMessageCount = _renderMessages.Count;
             ProcessRenderMessages();
@@ -136,7 +143,6 @@ namespace Project1.Engine.Systems
             if (_debugMode)
             {
                 _debugSpriteBatch.Begin();
-
                 long ticksTaken = (DateTime.Now.Ticks - timeNow) / 10000;
                 
                 _debugSpriteBatch.DrawString(_fonts["Fonts/Debug"], $"Rendering Debug:\n" +
@@ -150,7 +156,6 @@ namespace Project1.Engine.Systems
                     $"Textures: {_graphicsDevice.Metrics.TextureCount}\n" +
                     $"Pos: [{Math.Round(Camera.Translation.X, 2)}, {Math.Round(Camera.Translation.Y, 2)}, {Math.Round(Camera.Translation.Z, 2)}]",
                     new Vector2(0, 0), Color.Yellow);
-
                 _debugSpriteBatch.End();
             }
         }

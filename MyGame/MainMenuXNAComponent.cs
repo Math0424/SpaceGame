@@ -27,6 +27,7 @@ namespace Project1.MyGame
             _world = new World(game)
                 .AddSystem<Camera>()
                 .AddSystem<RenderingSystem>()
+                .AddSystem<WorldGenerationSystem>()
                 .AddSystem<PhysicsSystem>();
                 //.AddSystem<HudSystem>();
             game.Components.Add(_world);
@@ -45,6 +46,13 @@ namespace Project1.MyGame
                 .AddComponent(new SpaceshipController(Matrix.CreateTranslation(new Vector3(0, 0.4f, 0.7f))))
                 .AddComponent(new MeshComponent("Models/Cockpit"));//, "Textures/Shotgun/shotgun_CM", "Textures/Shotgun/shotgun_ADD"));
 
+
+            _world.GetSystem<WorldGenerationSystem>().CreateRandomWorld(.75f);
+        }
+
+        public override void Update(GameTime gameTime)
+        {
+            _world.GetSystem<WorldGenerationSystem>().DebugDraw();
         }
 
         public int DrawOrder => 0;
