@@ -20,7 +20,7 @@ namespace Project2.MyGame.EngineComponents
         private Matrix _localCameraPos;
         private int _justFocused;
 
-        private const float DAMPENING_SPEED = 0.1f;
+        private const float DAMPENING_SPEED = 10;
         private const float ROTATION_SPEED = 10;
         private const float ACCELERATION_SPEED = 20;
 
@@ -50,6 +50,9 @@ namespace Project2.MyGame.EngineComponents
             float delta = (float)deltaTime.ElapsedGameTime.TotalSeconds;
             var pos = _entity.Position;
             var cam = _entity.World.Render.Camera;
+
+            Quaternion shipRotation;
+            pos.WorldMatrix.Decompose(out _, out shipRotation, out _);
 
             Quaternion rot = Quaternion.CreateFromYawPitchRoll(yaw, pitch, 0);
             Quaternion cRot;
@@ -96,7 +99,7 @@ namespace Project2.MyGame.EngineComponents
 
                 if (Input.IsNewMouseDown(Input.MouseButtons.LeftButton))
                 {
-                    _physics.AddImpulse(cam.Backward * 4, new Vector3(0, 0.5f, 0));
+                    _physics.AddImpulse(cam.Backward * 20, Vector3.Transform(new Vector3(0, 0.5f, 0), shipRotation));
                 }
             }
 
@@ -118,7 +121,6 @@ namespace Project2.MyGame.EngineComponents
                 pitch /= 1 + (delta * 20);
             }
 
-
             Vector3 addedForce = Vector3.Zero;
             if (Input.IsKeyDown(Keys.W))
                 addedForce += (pos.WorldMatrix.Forward * delta * ACCELERATION_SPEED);
@@ -134,17 +136,19 @@ namespace Project2.MyGame.EngineComponents
             if (Input.IsKeyDown(Keys.C))
                 addedForce += (pos.WorldMatrix.Down * delta * ACCELERATION_SPEED);
 
+            if (addedForce.LengthSquared() == 0)
+                _physics.AddForce(-_physics.LinearVelocity * delta * DAMPENING_SPEED);
+            else
+                _physics.AddForce(addedForce);
+
+
             if (Input.IsKeyDown(Keys.E))
                 _physics.AddTorque(pos.WorldMatrix.Forward * delta * ROTATION_SPEED);
             if (Input.IsKeyDown(Keys.Q))
                 _physics.AddTorque(pos.WorldMatrix.Backward * delta * ROTATION_SPEED);
+            _physics.AddTorque(-_physics.AngularVelocity * delta * DAMPENING_SPEED);
 
-            if (addedForce.LengthSquared() == 0)
-                _physics.AddForce(-_physics.LinearVelocity * DAMPENING_SPEED);
-            else
-                _physics.AddForce(addedForce);
 
-            _physics.AddTorque(-_physics.AngularVelocity * DAMPENING_SPEED);
         }
 
         public override void Close()

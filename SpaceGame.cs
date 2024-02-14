@@ -52,7 +52,8 @@ namespace Project1
                 Exit();
 
             base.Update(gameTime);
-            Input.UpdateState();
+            if (this.IsActive)
+                Input.UpdateState();
         }
     }
 }

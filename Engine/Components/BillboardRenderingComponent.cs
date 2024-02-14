@@ -16,12 +16,12 @@ namespace Project1.Engine.Components
         EntityFacing,
     }
 
-    internal class BillboardComponent : RenderableComponent
+    internal class BillboardRenderingComponent : RenderableComponent
     {
         private string _assetName;
         private BillboardOption _option;
 
-        public BillboardComponent(string assetName, BillboardOption option = BillboardOption.CameraFacing)
+        public BillboardRenderingComponent(string assetName, BillboardOption option = BillboardOption.CameraFacing)
         {
             _option = option;
             _assetName = assetName;

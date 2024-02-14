@@ -4,6 +4,7 @@ using Project1.Engine;
 using Project1.Engine.Components;
 using Project1.Engine.Systems;
 using Project1.Engine.Systems.GUI;
+using Project2.Engine.Components;
 using Project2.MyGame.EngineComponents;
 using System;
 using System.Collections.Generic;
@@ -44,10 +45,10 @@ namespace Project1.MyGame
                 .AddComponent(new PositionComponent(Matrix.Identity, Matrix.CreateScale(0.01f)))
                 .AddComponent(new PrimitivePhysicsComponent(RigidBodyType.Sphere, Engine.Components.RigidBodyFlags.Dynamic, 10))
                 .AddComponent(new SpaceshipController(Matrix.CreateTranslation(new Vector3(0, 0.4f, 0.7f))))
-                .AddComponent(new MeshComponent("Models/Cockpit"));//, "Textures/Shotgun/shotgun_CM", "Textures/Shotgun/shotgun_ADD"));
+                .AddComponent(new MeshComponent("Models/Cockpit"))
+                .AddComponent(new MeshRenderingComponent());
 
-
-            _world.GetSystem<WorldGenerationSystem>().CreateRandomWorld(.75f);
+            _world.GetSystem<WorldGenerationSystem>().CreateRandomWorld(1);
         }
 
         public override void Update(GameTime gameTime)

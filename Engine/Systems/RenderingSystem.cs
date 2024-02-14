@@ -12,7 +12,6 @@ using System.Threading.Tasks;
 
 namespace Project1.Engine.Systems
 {
-
     internal class RenderingSystem : SystemComponent, IDrawUpdate
     {
         public static GraphicsDeviceManager _graphics;
@@ -224,21 +223,21 @@ namespace Project1.Engine.Systems
                         var loadEffect = (RenderMessageLoadEffect)message;
                         _effects[loadEffect.Effect] = _game.Content.Load<Effect>(loadEffect.Effect);
                         break;
-                    case RenderMessageType.DrawBasicMesh:
-                        var drawBasicMesh = (RenderMessageDrawMesh)message;
-                        foreach (ModelMesh mesh in _meshes[drawBasicMesh.Model].Meshes)
-                        {
-                            foreach (ModelMeshPart part in mesh.MeshParts)
-                            {
-                                Matrix model = mesh.ParentBone.Transform * drawBasicMesh.Matrix;
-                                part.Effect = _basicEffect;
-                                _basicEffect.World = model;
-                            }
-                            mesh.Draw();
-                        }
-                        break;
+                    // case RenderMessageType.DrawBasicMesh:
+                    //     var drawBasicMesh = (RenderMessageDrawMesh)message;
+                    //     foreach (ModelMesh mesh in _meshes[drawBasicMesh.Model].Meshes)
+                    //     {
+                    //         foreach (ModelMeshPart part in mesh.MeshParts)
+                    //         {
+                    //             Matrix model = mesh.ParentBone.Transform * drawBasicMesh.Matrix;
+                    //             part.Effect = _basicEffect;
+                    //             _basicEffect.World = model;
+                    //         }
+                    //         mesh.Draw();
+                    //     }
+                    //     break;
                     case RenderMessageType.DrawMesh:
-                        var drawEffectMesh = (RenderMessageDrawTexturedMesh)message;
+                        var drawEffectMesh = (RenderMessageDrawMesh)message;
                         var effect = _effects["Shaders/WorldShader"];
                         effect.Parameters["ViewDir"].SetValue(Camera.WorldMatrix.Forward);
                         effect.Parameters["DiffuseDirection"].SetValue(Vector3.Down);
@@ -247,9 +246,9 @@ namespace Project1.Engine.Systems
                         effect.Parameters["AmbientColor"].SetValue(new Vector3(1, 1, 1));
                         effect.Parameters["AmbientIntensity"].SetValue(0.1f);
 
-                        effect.Parameters["Texture_CM"].SetValue(_textures[drawEffectMesh.Texture_CM]);
-                        effect.Parameters["Texture_ADD"].SetValue(_textures[drawEffectMesh.Texture_ADD]);
-                        foreach (ModelMesh mesh in _meshes[drawEffectMesh.Model].Meshes)
+                        effect.Parameters["Texture_CM"].SetValue(_textures[drawEffectMesh.Model.Texture_CM]);
+                        effect.Parameters["Texture_ADD"].SetValue(_textures[drawEffectMesh.Model.Texture_ADD]);
+                        foreach (ModelMesh mesh in drawEffectMesh.Model.Model.Meshes)
                         {
                             foreach (ModelMeshPart part in mesh.MeshParts)
                             {

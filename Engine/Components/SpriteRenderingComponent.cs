@@ -10,11 +10,11 @@ using System.Threading.Tasks;
 
 namespace Project1.Engine.Components
 {
-    internal class SpriteComponent : RenderableComponent
+    internal class SpriteRenderingComponent : RenderableComponent
     {
         private string _assetName;
 
-        public SpriteComponent(string assetName)
+        public SpriteRenderingComponent(string assetName)
         {
             _assetName = assetName;
         }

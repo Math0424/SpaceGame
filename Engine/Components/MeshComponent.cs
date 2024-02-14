@@ -11,13 +11,6 @@ using System.Threading.Tasks;
 
 namespace Project1.Engine.Components
 {
-    enum RenderType
-    {
-        Vertex,
-        ColorMap,
-        ColorMapAdd,
-    }
-
     struct ModelInfo
     {
         public Model Model;
@@ -32,7 +25,7 @@ namespace Project1.Engine.Components
         public float BoundingSphereRadius;
     }
 
-    internal class MeshComponent : RenderableComponent
+    internal class MeshComponent : EntityComponent
     {
         // TODO : possible memory leak if lots unique models are created and then never used again
         private static Dictionary<string, ModelInfo> cache = new Dictionary<string, ModelInfo>();
@@ -92,41 +85,11 @@ namespace Project1.Engine.Components
             _entity.World.Render.EnqueueMessage(new RenderMessageLoadMesh(_info.Name));
             _entity.Position.UpdatedTransforms += UpdateAABB;
             SetModel(_info.Name);
-
-            // _entity.World.Render.DoDebugDraw += DebugDraw;
-        }
-
-        private void DebugDraw()
-        {
-            BoundingBox bb = _AABB;
-            Vector3 pos = (bb.Max + bb.Min) / 2;
-            Vector3 halfExtents = (bb.Max - bb.Min) / 2;
-            Matrix mat = Matrix.CreateScale(halfExtents) * Matrix.CreateTranslation(pos);
-            _entity.World.Render.EnqueueMessage(new RenderMessageDrawBox(mat));
         }
 
         public override void Close()
         {
             _entity.Position.UpdatedTransforms -= UpdateAABB;
-            // _entity.World.Render.DoDebugDraw -= DebugDraw;
-        }
-
-        public override bool IsVisible(ref Camera cam)
-        {
-            Matrix lm = _entity.Position.WorldMatrix;
-            Vector3 extents = lm.HalfExtents();
-            float scale = _info.BoundingSphereRadius * Math.Max(extents.X, Math.Max(extents.Y, extents.Z));
-            return cam.Frustum.Intersects(new BoundingSphere(_entity.Position.Position, scale));
-        }
-
-        public override void Draw(RenderingSystem rendering, ref Camera cam)
-        {
-            if (_info.Texture_CM == null && _info.Texture_ADD == null)
-            {
-                rendering.EnqueueMessage(new RenderMessageDrawMesh(_info.Name, _entity.Position.TransformMatrix));
-                return;
-            }
-            rendering.EnqueueMessage(new RenderMessageDrawTexturedMesh(_info.Name, _info.Texture_CM, _info.Texture_ADD, _entity.Position.TransformMatrix));
         }
 
         private void SetModel(string name)

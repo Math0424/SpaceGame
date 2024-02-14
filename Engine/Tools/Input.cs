@@ -118,6 +118,7 @@ namespace Project1.Engine
 
         public static void UpdateState()
         {
+            //TODO: if the window is not focused, do not update the input
             _keysLastFrame = Keyboard.GetState().GetPressedKeys();
             _mouseLastFrame = Mouse.GetState();
         }

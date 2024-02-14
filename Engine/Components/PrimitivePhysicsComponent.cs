@@ -169,19 +169,26 @@ namespace Project1.Engine.Components
         {
             var pos = _entity.Position;
 
+            if (Vector3.Dot(_entity.World.Render.Camera.Forward, _entity.World.Render.Camera.Translation - pos.Position) > .5f)
+                return;
+
             DrawingUtils.DrawMatrix(render, pos.WorldMatrix);
 
-            BulletSharp.Math.Vector3 bMin;
-            BulletSharp.Math.Vector3 bMax;
-            _rigidBody.GetAabb(out bMin, out bMax);
+            // BulletSharp.Math.Vector3 bMin;
+            // BulletSharp.Math.Vector3 bMax;
+            // _rigidBody.GetAabb(out bMin, out bMax);
 
-            Vector3 size = bMax.ToXNA() - bMin.ToXNA();
+            // Vector3 size = bMax.ToXNA() - bMin.ToXNA();
+            // Matrix aabb = Matrix.CreateTranslation(pos.WorldMatrix.Translation);
+            // aabb.Forward = new Vector3(size.X, 0, 0);
+            // aabb.Up = new Vector3(0, size.Y, 0);
+            // aabb.Right = new Vector3(0, 0, size.Z);
 
-            Matrix aabb = Matrix.CreateTranslation(pos.WorldMatrix.Translation);
-            aabb.Forward = new Vector3(size.X, 0, 0);
-            aabb.Up = new Vector3(0, size.Y, 0);
-            aabb.Right = new Vector3(0, 0, size.Z);
-            render.EnqueueMessage(new RenderMessageDrawBox(aabb));
+            Matrix boxMatrix = pos.WorldMatrix;
+            boxMatrix.Forward /= 2;
+            boxMatrix.Right /= 2;
+            boxMatrix.Up /= 2;
+            render.EnqueueMessage(new RenderMessageDrawBox(boxMatrix));
 
             if (_flags != RigidBodyFlags.Static)
             {

@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -37,6 +38,72 @@ namespace Project1.Engine
 
     internal static class MathExtensions
     {
+
+        /// <summary>
+        /// Creates an array of smooth points with at a specified resolution
+        /// </summary>
+        /// <param name="points">control points</param>
+        /// <param name="resolution"> how big should each step between the points be</param>
+        /// <returns>Retuns a list of points</returns>
+        public static Vector3[] CatmullRom(Vector3[] points, float resolution)
+        {
+            List<Vector3> result = new List<Vector3>();
+
+            for (int i = 0; i < points.Length - 1; i++)
+            {
+                Vector3 P0, P1, P2, P3;
+                if (i == 0) //first segment
+                {
+                    P0 = points[i];
+                    P1 = points[i];
+                    P2 = points[i + 1];
+                    P3 = (points.Length > 2) ? points[i + 2] : points[i + 1];
+                }
+                else if (i == points.Length - 2) // last segment
+                {
+                    P0 = points[i - 1];
+                    P1 = points[i];
+                    P2 = points[i + 1];
+                    P3 = points[i + 1];
+                }
+                else
+                {
+                    P0 = points[i - 1];
+                    P1 = points[i];
+                    P2 = points[i + 1];
+                    P3 = points[i + 2];
+                }
+
+                float t = 0.0f;
+                while (t < 1.0f)
+                {
+                    Vector3 point = CalculateCatmullRom(P0, P1, P2, P3, t);
+                    result.Add(point);
+                    t += resolution;
+                }
+            }
+            result.Add(points[points.Length - 1]); // Add the last point separately
+            return result.ToArray();
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static Vector3 CalculateCatmullRom(Vector3 P0, Vector3 P1, Vector3 P2, Vector3 P3, float t)
+        {
+            float t2 = t * t;
+            float t3 = t2 * t;
+            return 0.5f * ((2.0f * P1) + (-P0 + P2) * t + (2.0f * P0 - 5.0f * P1 + 4f * P2 - P3) * t2
+                           + (-P0 + 3.0f * P1 - 3.0f * P2 + P3) * t3);
+        }
+
+
+        public static void BezierQuadratic(Vector3[] arr, float t, out Vector3 pos, out Vector3 normal)
+        {
+            Vector3 a = Vector3.Lerp(arr[0], arr[1], t);
+            Vector3 b = Vector3.Lerp(arr[1], arr[2], t);
+            pos = Vector3.Lerp(a, b, t);
+            normal = Vector3.Normalize(a - b);
+        }
+
         public static Vector3 ToXNA(this BulletSharp.Math.Vector3 v)
         {
             return new Vector3((float)v.X, (float)v.Y, (float)v.Z);

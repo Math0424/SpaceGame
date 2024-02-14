@@ -21,7 +21,6 @@ namespace Project1.Engine.Systems.RenderMessages
         DrawText,
 
         DrawMesh,
-        DrawBasicMesh,
 
         DrawLine,
         DrawQuad,
