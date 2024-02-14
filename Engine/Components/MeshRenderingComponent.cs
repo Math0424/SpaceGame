@@ -27,7 +27,7 @@ namespace Project2.Engine.Components
             IsActive = true;
         }
 
-        public MeshRenderingComponent(float transparency) : base()
+        public MeshRenderingComponent(float transparency) : this()
         {
             Transparency = transparency;
         }
@@ -43,15 +43,15 @@ namespace Project2.Engine.Components
                 return;
 
             RenderType renderType = RenderType.Default;
-            if (ColorOverride)
-            {
-                renderType = RenderType.OverrideColor;
-            }
 
             if (_mesh.Model.Texture_CM != null && _mesh.Model.Texture_ADD != null)
-            {
                 renderType = RenderType.ColorMetalAdd;
-            }
+
+            if (ColorOverride)
+                renderType |= RenderType.OverrideColor;
+
+            if (Transparency != 0)
+                renderType |= RenderType.Transparency;
 
             system.EnqueueMessage(new RenderMessageDrawMesh(_mesh.Model, renderType, Transparency, DrawColor, _entity.Position.TransformMatrix));
         }

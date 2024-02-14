@@ -9,25 +9,29 @@ namespace Project1.Engine.Systems.RenderMessages
 {
     enum RenderMessageType
     {
-        None,
+        None = 0,
 
-        LoadMesh,
-        LoadFont,
-        LoadEffect,
-        LoadTexture,
+        LoadMesh = 1 << 0 | Load,
+        LoadFont = 1 << 1 | Load,
+        LoadEffect = 1 << 2 | Load,
+        LoadTexture = 1 << 3 | Load,
 
-        DrawSprite,
-        DrawColoredSprite,
-        DrawText,
+        DrawSprite = 1 << 4 | Depth,
+        DrawColoredSprite = 1 << 5 | Depth,
+        DrawText = 1 << 6 | Depth,
 
-        DrawMesh,
+        Sorting = 1 << 7,
 
-        DrawLine,
-        DrawQuad,
+        DrawMesh = 1 << 8 | Sorting,
+        DrawQuad = 1 << 10 | Sorting,
 
-        DrawBox,
-        DrawSphere,
-        DrawPlane,
+        DrawLine = 1 << 9,
+        DrawBox = 1 << 11,
+        DrawSphere = 1 << 12,
+        DrawPlane = 1 << 13,
+
+        Load = 1 << 14,
+        Depth = 1 << 15,
     }
 
     internal abstract class RenderMessage

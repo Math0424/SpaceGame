@@ -3,6 +3,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Project1.Engine.Components;
 using Project1.Engine.Systems.RenderMessages;
+using Project2.Engine.Systems.RenderMessages;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -136,7 +137,7 @@ namespace Project1.Engine.Systems
                 DoDebugDraw?.Invoke();
 
             int renderMessageCount = _renderMessages.Count;
-            ProcessRenderMessages();
+            ConsumeMessages();
             _renderMessages.Clear();
 
             if (_debugMode)
@@ -188,22 +189,37 @@ namespace Project1.Engine.Systems
         };
         private static short[] _boxVertexIndices = new short[] { 0,1, 1,2, 2,3, 3,0,  4,5, 5,6, 6,7, 7,4,  0,4, 1,5, 2,6, 3,7 };
 
+
+        List<RenderMessage> _loadMessages = new List<RenderMessage>();
+        List<RenderMessage> _drawMessages = new List<RenderMessage>();
+        List<RenderMessage> _spriteMessages = new List<RenderMessage>();
+        List<RenderMessage> _otherMessages = new List<RenderMessage>();
+        private void ConsumeMessages()
+        {
+            RenderMessage[] arr = _renderMessages.ToArray();
+            for (int i = 0; i < arr.Length; i++)
+            {
+                RenderMessageType elm = arr[i].Type;
+                if ((elm & RenderMessageType.Sorting) != 0)
+                    _drawMessages.Add(arr[i]);
+                else if ((elm & RenderMessageType.Depth) != 0)
+                    _spriteMessages.Add(arr[i]);
+                else if ((elm & RenderMessageType.Load) != 0)
+                    _loadMessages.Add(arr[i]);
+                else
+                    _otherMessages.Add(arr[i]);
+            }
+            ProcessRenderMessages();
+            _loadMessages.Clear();
+            _drawMessages.Clear();
+            _spriteMessages.Clear();
+            _otherMessages.Clear();
+            _renderMessages.Clear();
+        }
+
         private void ProcessRenderMessages()
         {
-            _basicEffect.World = Matrix.Identity;
-            _basicEffect.View = Camera.ViewMatrix;
-            _basicEffect.Projection = Camera.ProjectionMatrix;
-            _basicEffect.TextureEnabled = true;
-            _basicEffect.VertexColorEnabled = false;
-
-            _graphicsDevice.DepthStencilState = DepthStencilState.Default;
-            _graphicsDevice.BlendState = BlendState.Opaque;
-            _graphicsDevice.SamplerStates[0] = SamplerState.LinearWrap;
-
-            _basicEffect.CurrentTechnique.Passes[0].Apply();
-
-            RenderMessage[] arr = _renderMessages.ToArray();
-            foreach (var message in arr)
+            foreach(var message in _loadMessages)
             {
                 switch (message.Type)
                 {
@@ -223,19 +239,18 @@ namespace Project1.Engine.Systems
                         var loadEffect = (RenderMessageLoadEffect)message;
                         _effects[loadEffect.Effect] = _game.Content.Load<Effect>(loadEffect.Effect);
                         break;
-                    // case RenderMessageType.DrawBasicMesh:
-                    //     var drawBasicMesh = (RenderMessageDrawMesh)message;
-                    //     foreach (ModelMesh mesh in _meshes[drawBasicMesh.Model].Meshes)
-                    //     {
-                    //         foreach (ModelMeshPart part in mesh.MeshParts)
-                    //         {
-                    //             Matrix model = mesh.ParentBone.Transform * drawBasicMesh.Matrix;
-                    //             part.Effect = _basicEffect;
-                    //             _basicEffect.World = model;
-                    //         }
-                    //         mesh.Draw();
-                    //     }
-                    //     break;
+                }
+            }
+
+            _graphicsDevice.DepthStencilState = DepthStencilState.Default;
+            _graphicsDevice.BlendState = BlendState.Opaque;
+            _graphicsDevice.SamplerStates[0] = SamplerState.LinearWrap;
+
+            RenderMessage[] arr = _drawMessages.OrderBy(e => -Vector3.DistanceSquared(((RenderMessageSorting)e).Matrix.Translation, Camera.Translation)).ToArray();
+            foreach (var message in arr)
+            {
+                switch (message.Type)
+                {
                     case RenderMessageType.DrawMesh:
                         var drawEffectMesh = (RenderMessageDrawMesh)message;
                         var effect = _effects["Shaders/WorldShader"];
@@ -245,32 +260,38 @@ namespace Project1.Engine.Systems
                         effect.Parameters["DiffuseIntensity"].SetValue(0.8f);
                         effect.Parameters["AmbientColor"].SetValue(new Vector3(1, 1, 1));
                         effect.Parameters["AmbientIntensity"].SetValue(0.1f);
+                        effect.Parameters["Transparency"].SetValue(drawEffectMesh.Transparency);
+                        effect.Parameters["ViewProjection"].SetValue(Camera.ViewMatrix * Camera.ProjectionMatrix);
 
-                        effect.Parameters["Texture_CM"].SetValue(_textures[drawEffectMesh.Model.Texture_CM]);
-                        effect.Parameters["Texture_ADD"].SetValue(_textures[drawEffectMesh.Model.Texture_ADD]);
-                        foreach (ModelMesh mesh in drawEffectMesh.Model.Model.Meshes)
+                        if ((drawEffectMesh.RenderType & RenderType.ColorMetalAdd) != 0)
+                        {
+                            effect.Parameters["Texture_CM"].SetValue(_textures[drawEffectMesh.Model.Texture_CM]);
+                            effect.Parameters["Texture_ADD"].SetValue(_textures[drawEffectMesh.Model.Texture_ADD]);
+                        }
+                        
+                        if ((drawEffectMesh.RenderType & RenderType.Transparency) != 0)
+                        {
+                            effect.CurrentTechnique = effect.Techniques[1];
+                            _graphicsDevice.BlendState = BlendState.AlphaBlend;
+                        }
+                        else
+                        {
+                            effect.CurrentTechnique = effect.Techniques[0];
+                            _graphicsDevice.BlendState = BlendState.Opaque;
+                        }
+
+                        effect.CurrentTechnique.Passes[0].Apply();
+                        foreach (ModelMesh mesh in _meshes[drawEffectMesh.Model.Name].Meshes)
                         {
                             foreach (ModelMeshPart part in mesh.MeshParts)
                             {
                                 part.Effect = effect;
-                                Matrix model = drawEffectMesh.Matrix * mesh.ParentBone.Transform;
-                                effect.Parameters["WorldViewProjection"].SetValue(model * Camera.ViewMatrix * Camera.ProjectionMatrix);
-                                effect.Parameters["WorldInverseTranspose"].SetValue(Matrix.Transpose(Matrix.Invert(model)));
-                                effect.Parameters["WorldMatrix"].SetValue(model);
+                                Matrix model = mesh.ParentBone.Transform * drawEffectMesh.Matrix;
+                                part.Effect.Parameters["WorldInverseTranspose"].SetValue(Matrix.Transpose(Matrix.Invert(model)));
+                                part.Effect.Parameters["World"].SetValue(model);
                             }
                             mesh.Draw();
                         }
-                        break;
-                    case RenderMessageType.DrawLine:
-                        var drawLine = (RenderMessageDrawLine)message;
-                        _basicEffect.VertexColorEnabled = true;
-                        _basicEffect.TextureEnabled = false;
-                        _basicEffect.World = Matrix.Identity;
-                        _basicEffect.CurrentTechnique.Passes[0].Apply();
-                        var coloredLineVertices = new[] {
-                            new VertexPositionColor(drawLine.Pos1, drawLine.Color), new VertexPositionColor(drawLine.Pos2, drawLine.Color),
-                        };
-                        _graphicsDevice.DrawUserPrimitives(PrimitiveType.LineList, coloredLineVertices, 0, 1);
                         break;
                     case RenderMessageType.DrawQuad:
                         var drawQuad = (RenderMessageDrawQuad)message;
@@ -284,6 +305,31 @@ namespace Project1.Engine.Systems
                         else
                             _graphicsDevice.DrawUserIndexedPrimitives(PrimitiveType.TriangleList, _quadVertexPositionTexture, 0, 4, _quadVertexIndicesNoBack, 0, 2);
                         _basicEffect.View = Camera.ViewMatrix;
+                        break;
+                }
+            }
+
+            _basicEffect.World = Matrix.Identity;
+            _basicEffect.View = Camera.ViewMatrix;
+            _basicEffect.Projection = Camera.ProjectionMatrix;
+            _basicEffect.TextureEnabled = true;
+            _basicEffect.VertexColorEnabled = false;
+            _basicEffect.CurrentTechnique.Passes[0].Apply();
+
+            foreach(var message in _otherMessages)
+            {
+                switch (message.Type)
+                {
+                    case RenderMessageType.DrawLine:
+                        var drawLine = (RenderMessageDrawLine)message;
+                        _basicEffect.VertexColorEnabled = true;
+                        _basicEffect.TextureEnabled = false;
+                        _basicEffect.World = Matrix.Identity;
+                        _basicEffect.CurrentTechnique.Passes[0].Apply();
+                        var coloredLineVertices = new[] {
+                            new VertexPositionColor(drawLine.Pos1, drawLine.Color), new VertexPositionColor(drawLine.Pos2, drawLine.Color),
+                        };
+                        _graphicsDevice.DrawUserPrimitives(PrimitiveType.LineList, coloredLineVertices, 0, 1);
                         break;
                     case RenderMessageType.DrawBox:
                         var drawBox = (RenderMessageDrawBox)message;
@@ -307,14 +353,11 @@ namespace Project1.Engine.Systems
                 }
             }
 
-            RenderMessage[] depthSpriteBatch = _renderMessages.Where(e => 
-                                                        e.Type == RenderMessageType.DrawSprite || 
-                                                        e.Type == RenderMessageType.DrawText || 
-                                                        e.Type == RenderMessageType.DrawColoredSprite)
-                                                .OrderBy(e => -((RenderMessageDepth)e).Depth).ToArray();
+
+            RenderMessage[] depthSpriteBatch = _spriteMessages.OrderBy(e => -((RenderMessageDepth)e).Depth).ToArray();
             _spriteEffect.CurrentTechnique.Passes[0].Apply();
             _spriteBatch.Begin();
-            foreach (var sprite in depthSpriteBatch)
+            foreach (var sprite in _spriteMessages)
             {
                 switch(sprite.Type)
                 {

@@ -8,9 +8,9 @@
 #endif
 
 // Data
-float4x4 WorldViewProjection;
+float4x4 World;
+float4x4 ViewProjection;
 float3x3 WorldInverseTranspose;
-float4x4 WorldMatrix;
 float3 ViewDir;
 
 float3 DiffuseDirection;
@@ -19,6 +19,8 @@ float DiffuseIntensity;
 
 float3 AmbientColor;
 float AmbientIntensity;
+
+float Transparency;
 
 texture Texture_Skybox;
 
@@ -66,7 +68,7 @@ struct VertexShaderInput
 
 struct VertexShaderOutput
 {
-	float4 Position : SV_POSITION;
+	float4 Position : SV_POSITION0;
 	float2 TextureCoordinate : TEXCOORD0;
 	float3 Normal : TEXCOORD1;
 	float3 ViewDir : TEXCOORD2;
@@ -76,10 +78,12 @@ VertexShaderOutput MainVS(in VertexShaderInput input)
 {
 	VertexShaderOutput output = (VertexShaderOutput)0;
 	output.TextureCoordinate = input.TextureCoordinate;
-	output.Position = mul(input.Position, WorldViewProjection);
 	output.Normal = mul(input.Normal, WorldInverseTranspose);
+	
+	float4 worldPos = mul(input.Position, World);
+	output.Position = mul(worldPos, ViewProjection);
 
-	output.ViewDir = normalize(ViewDir - mul(input.Position, WorldMatrix));
+	output.ViewDir = normalize(ViewDir - mul(input.Position, World));
 	return output;
 }
 
@@ -95,13 +99,27 @@ float4 MainPS(VertexShaderOutput input) : COLOR0
 	float3 reflection = normalize(2 * dot(input.Normal, -DiffuseDirection) * input.Normal + DiffuseDirection);
 	float specular = pow(saturate(dot(reflection, input.ViewDir)), CM.a * 10) * (1 - ADD.g);
 
-    return (float4(ambient + diffuse + specular, 1) * CM * ADD.r);
+	float4 finalColor = (float4(ambient + diffuse + specular, 1) + CM * ADD.r);
+	finalColor.a = Transparency;
+    return finalColor;
 }
 
-technique Techninque1
+technique Default
 {
-	pass Pass1
+	pass Pass0
 	{
+		VertexShader = compile VS_SHADERMODEL MainVS();
+		PixelShader = compile PS_SHADERMODEL MainPS();
+	}
+};
+
+technique Transparent
+{
+	pass Pass0
+	{
+		AlphaBlendEnable = TRUE;
+		DestBlend = INVSRCALPHA;
+		SrcBlend = SRCALPHA;
 		VertexShader = compile VS_SHADERMODEL MainVS();
 		PixelShader = compile PS_SHADERMODEL MainPS();
 	}

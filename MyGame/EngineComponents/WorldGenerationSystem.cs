@@ -3,6 +3,7 @@ using Project1.Engine;
 using Project1.Engine.Components;
 using Project1.Engine.Systems.RenderMessages;
 using Project2.Engine.Components;
+using Project2.MyGame.EngineComponents;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -51,9 +52,7 @@ namespace Project1.MyGame
                 Vector3 pos = arrowPoints[i];
 
                 if (i % 4 == 0)
-                {
                     SpawnCheckpoint(pos, normal);
-                }
                 else
                 {
                     _checkpoints.Add(pos);
@@ -61,7 +60,8 @@ namespace Project1.MyGame
                     _world.CreateEntity()
                             .AddComponent(new PositionComponent(transform, Matrix.CreateScale(0.01f)))
                             .AddComponent(new MeshComponent("Models/Arrow"))
-                            .AddComponent(new MeshRenderingComponent(0.5f));
+                            .AddComponent(new MeshRenderingComponent())
+                            .AddComponent(new HideWhenClose());
                 }
             }
         }
