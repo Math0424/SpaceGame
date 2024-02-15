@@ -13,6 +13,8 @@ float4x4 ViewProjection;
 float3x3 WorldInverseTranspose;
 float3 ViewDir;
 
+float3 Color;
+
 float3 DiffuseDirection;
 float4 DiffuseColor;
 float DiffuseIntensity;
@@ -26,14 +28,14 @@ texture Texture_Skybox;
 
 // color
 // rgb - color
-// a - metal
+// alpha - metal
 texture Texture_CM;
 // spectular 
 // red - AO
 // green - roughness
-// blue - enviroment strength
+// blue - colorability
+// alpha - transparency
 texture Texture_ADD;
-
 
 sampler2D Sampler_CM = sampler_state {
 	Texture = (Texture_CM);
@@ -97,10 +99,10 @@ float4 MainPS(VertexShaderOutput input) : COLOR0
 	float3 diffuse = DiffuseIntensity * DiffuseColor * intensity;
 
 	float3 reflection = normalize(2 * dot(input.Normal, -DiffuseDirection) * input.Normal + DiffuseDirection);
-	float specular = pow(saturate(dot(reflection, input.ViewDir)), CM.a * 10) * (1 - ADD.g);
+	float specular = pow(saturate(dot(reflection, input.ViewDir)), CM.a * 5) * (1 - ADD.g);
 
-	float4 finalColor = (float4(ambient + diffuse + specular, 1) + CM * ADD.r);
-	finalColor.a = Transparency;
+	float4 finalColor = (float4(ambient + diffuse + specular, 1) + CM * ADD.r) + float4(Color * (ADD.b), 1);
+	finalColor.a = ADD.a * Transparency;
     return finalColor;
 }
 

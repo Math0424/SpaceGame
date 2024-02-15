@@ -41,19 +41,22 @@ namespace Project1.MyGame
             // var menu = new MainMenuGUI(hud.Root);
             // menu.StartGame += StartGame;
 
-            _world.CreateEntity()
-                .AddComponent(new PositionComponent(Matrix.Identity, Matrix.CreateScale(0.01f)))
+            var spaceship = _world.CreateEntity()
+                .AddComponent(new PositionComponent(Matrix.Identity))//, Matrix.CreateScale(0.01f)))
                 .AddComponent(new PrimitivePhysicsComponent(RigidBodyType.Sphere, Engine.Components.RigidBodyFlags.Dynamic, 10))
                 .AddComponent(new SpaceshipController(Matrix.CreateTranslation(new Vector3(0, 0.4f, 0.7f))))
-                .AddComponent(new MeshComponent("Models/Cockpit"))
-                .AddComponent(new MeshRenderingComponent());
+                .AddComponent(new MeshComponent("Models/Cockpit", "Textures/Spaceship/ship_CM", "Textures/Spaceship/ship_ADD"))
+                .AddComponent(new MeshRenderingComponent())
+                .AddComponent(new MeshAnimationComponent());
+
+            spaceship.GetComponent<MeshAnimationComponent>().LoadAnimation("openCockpit", "Animations/OpenCockpit.txt");
 
             _world.GetSystem<WorldGenerationSystem>().CreateRandomWorld(1);
         }
 
         public override void Update(GameTime gameTime)
         {
-            _world.GetSystem<WorldGenerationSystem>().DebugDraw();
+
         }
 
         public int DrawOrder => 0;

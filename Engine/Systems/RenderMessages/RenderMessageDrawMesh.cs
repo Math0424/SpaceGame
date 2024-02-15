@@ -9,26 +9,15 @@ using System.Threading.Tasks;
 
 namespace Project1.Engine.Systems.RenderMessages
 {
-
-    internal enum RenderType
-    {
-        Default = 0,
-        ColorMetalAdd = 1 << 0,
-        OverrideColor = 1 << 1,
-        Transparency = 1 << 2,
-    }
-
     internal class RenderMessageDrawMesh : RenderMessageSorting
     {
-        public RenderType RenderType { get; private set; }
         public float Transparency { get; private set; }
-        public Color ColorOverride { get; private set; }
+        public Color Color { get; private set; }
         public ModelInfo Model { get; private set; }
-        public RenderMessageDrawMesh(ModelInfo model, RenderType type, float transparency, Color color, Matrix transformMatrix) : base(RenderMessageType.DrawMesh)
+        public RenderMessageDrawMesh(ModelInfo model, float transparency, Color color, Matrix transformMatrix) : base(RenderMessageType.DrawMesh)
         {
             this.Transparency = transparency;
-            this.ColorOverride = color;
-            this.RenderType = type;
+            this.Color = color;
             this.Model = model;
             this.Matrix = transformMatrix;
         }

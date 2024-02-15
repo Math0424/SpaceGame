@@ -14,7 +14,6 @@ namespace Project1.Engine.Components
     struct ModelInfo
     {
         public Model Model;
-        public RenderType RenderType;
         public string Texture_CM;
         public string Texture_ADD;
 
@@ -102,7 +101,7 @@ namespace Project1.Engine.Components
             ModelInfo modelInfo;
             Model model = _entity.World.Game.Content.Load<Model>(name);
             CalculateModelInfo(model, out modelInfo);
-            
+
             modelInfo.Name = name;
             cache[name] = modelInfo;
             _info = modelInfo;

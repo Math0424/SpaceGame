@@ -16,20 +16,14 @@ namespace Project2.Engine.Components
         public bool IsActive;
 
         public float Transparency;
-
-        public bool ColorOverride;
-        public Color DrawColor;
-
+        public Color Color;
         private MeshComponent _mesh;
 
         public MeshRenderingComponent()
         {
+            Transparency = 1;
             IsActive = true;
-        }
-
-        public MeshRenderingComponent(float transparency) : this()
-        {
-            Transparency = transparency;
+            Color = Color.Transparent;
         }
 
         public override void Initalize()
@@ -42,18 +36,7 @@ namespace Project2.Engine.Components
             if (!IsActive)
                 return;
 
-            RenderType renderType = RenderType.Default;
-
-            if (_mesh.Model.Texture_CM != null && _mesh.Model.Texture_ADD != null)
-                renderType = RenderType.ColorMetalAdd;
-
-            if (ColorOverride)
-                renderType |= RenderType.OverrideColor;
-
-            if (Transparency != 0)
-                renderType |= RenderType.Transparency;
-
-            system.EnqueueMessage(new RenderMessageDrawMesh(_mesh.Model, renderType, Transparency, DrawColor, _entity.Position.TransformMatrix));
+            system.EnqueueMessage(new RenderMessageDrawMesh(_mesh.Model, Transparency, Color, _entity.Position.TransformMatrix));
         }
 
         private void DebugDraw()

@@ -59,9 +59,9 @@ namespace Project1.MyGame
                     Matrix transform = Matrix.CreateWorld(pos, normal, Vector3.Cross(pos, normal));
                     _world.CreateEntity()
                             .AddComponent(new PositionComponent(transform, Matrix.CreateScale(0.01f)))
-                            .AddComponent(new MeshComponent("Models/Arrow"))
-                            .AddComponent(new MeshRenderingComponent())
-                            .AddComponent(new HideWhenClose());
+                            .AddComponent(new MeshComponent("Models/Arrow", "Textures/Arrow/arrow_CM", "Textures/Arrow/arrow_ADD"))
+                            .AddComponent(new MeshRenderingComponent() { Color = Color.Yellow })
+                            .AddComponent(new ArrowAnimator());
                 }
             }
         }
@@ -72,8 +72,8 @@ namespace Project1.MyGame
             Matrix transform = Matrix.CreateWorld(pos, normal, Vector3.Cross(pos, normal));
 
             _world.CreateEntity()
-                .AddComponent(new PositionComponent(transform, Matrix.CreateScale(0.01f)))
-                .AddComponent(new MeshComponent("Models/ring"))
+                .AddComponent(new PositionComponent(transform))//, Matrix.CreateScale(0.01f)))
+                .AddComponent(new MeshComponent("Models/ring", "Textures/Ring/ring_CM", "Textures/Ring/ring_ADD"))
                 .AddComponent(new MeshRenderingComponent());
 
             Hitbox[] checkpointBoxes = ReadFile("Hitboxes/Ring.txt");
@@ -120,14 +120,6 @@ namespace Project1.MyGame
                 }
             }
             return boxes.ToArray();
-        }
-
-        public void DebugDraw()
-        {
-            for (int i = 0; i < _checkpoints.Count - 1; i++)
-            {
-                _world.Render.EnqueueMessage(new RenderMessageDrawLine(_checkpoints[i], _checkpoints[i+1], Color.White));
-            }
         }
 
     }

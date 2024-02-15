@@ -243,8 +243,8 @@ namespace Project1.Engine.Systems
             }
 
             _graphicsDevice.DepthStencilState = DepthStencilState.Default;
-            _graphicsDevice.BlendState = BlendState.Opaque;
             _graphicsDevice.SamplerStates[0] = SamplerState.LinearWrap;
+            _graphicsDevice.BlendState = BlendState.AlphaBlend;
 
             RenderMessage[] arr = _drawMessages.OrderBy(e => -Vector3.DistanceSquared(((RenderMessageSorting)e).Matrix.Translation, Camera.Translation)).ToArray();
             foreach (var message in arr)
@@ -255,42 +255,47 @@ namespace Project1.Engine.Systems
                         var drawEffectMesh = (RenderMessageDrawMesh)message;
                         var effect = _effects["Shaders/WorldShader"];
                         effect.Parameters["ViewDir"].SetValue(Camera.WorldMatrix.Forward);
-                        effect.Parameters["DiffuseDirection"].SetValue(Vector3.Down);
-                        effect.Parameters["DiffuseColor"].SetValue(new Vector3(255 / 255f, 247 / 255f, 166 / 255f));
-                        effect.Parameters["DiffuseIntensity"].SetValue(0.8f);
-                        effect.Parameters["AmbientColor"].SetValue(new Vector3(1, 1, 1));
-                        effect.Parameters["AmbientIntensity"].SetValue(0.1f);
-                        effect.Parameters["Transparency"].SetValue(drawEffectMesh.Transparency);
                         effect.Parameters["ViewProjection"].SetValue(Camera.ViewMatrix * Camera.ProjectionMatrix);
 
-                        if ((drawEffectMesh.RenderType & RenderType.ColorMetalAdd) != 0)
-                        {
-                            effect.Parameters["Texture_CM"].SetValue(_textures[drawEffectMesh.Model.Texture_CM]);
-                            effect.Parameters["Texture_ADD"].SetValue(_textures[drawEffectMesh.Model.Texture_ADD]);
-                        }
-                        
-                        if ((drawEffectMesh.RenderType & RenderType.Transparency) != 0)
-                        {
-                            effect.CurrentTechnique = effect.Techniques[1];
-                            _graphicsDevice.BlendState = BlendState.AlphaBlend;
-                        }
-                        else
-                        {
-                            effect.CurrentTechnique = effect.Techniques[0];
-                            _graphicsDevice.BlendState = BlendState.Opaque;
-                        }
+                        effect.Parameters["DiffuseDirection"].SetValue(Vector3.Down);
+                        effect.Parameters["DiffuseColor"].SetValue(new Vector3(255 / 255f, 247 / 255f, 250 / 255f));
+                        effect.Parameters["DiffuseIntensity"].SetValue(0.8f);
 
-                        effect.CurrentTechnique.Passes[0].Apply();
-                        foreach (ModelMesh mesh in _meshes[drawEffectMesh.Model.Name].Meshes)
+                        effect.Parameters["AmbientColor"].SetValue(new Vector3(1, 1, 1));
+                        effect.Parameters["AmbientIntensity"].SetValue(0.1f);
+
+                        effect.Parameters["Transparency"].SetValue(drawEffectMesh.Transparency);
+                        effect.Parameters["Color"].SetValue(drawEffectMesh.Color.ToVector3());
+
+                        if (drawEffectMesh.Model.Texture_CM != null)
+                            effect.Parameters["Texture_CM"].SetValue(_textures[drawEffectMesh.Model.Texture_CM]);
+                        
+                        if (drawEffectMesh.Model.Texture_ADD != null)
+                            effect.Parameters["Texture_ADD"].SetValue(_textures[drawEffectMesh.Model.Texture_ADD]);
+
+                        effect.CurrentTechnique = effect.Techniques[1];
+                        var model = drawEffectMesh.Model.Model;
+                        foreach (ModelMesh mesh in model.Meshes)
                         {
-                            foreach (ModelMeshPart part in mesh.MeshParts)
+                            for (int i = 0; i < mesh.MeshParts.Count; i++)
                             {
-                                part.Effect = effect;
-                                Matrix model = mesh.ParentBone.Transform * drawEffectMesh.Matrix;
-                                part.Effect.Parameters["WorldInverseTranspose"].SetValue(Matrix.Transpose(Matrix.Invert(model)));
-                                part.Effect.Parameters["World"].SetValue(model);
+                                ModelMeshPart modelMeshPart = mesh.MeshParts[i];
+                                if (modelMeshPart.PrimitiveCount > 0)
+                                {
+                                    _graphicsDevice.SetVertexBuffer(modelMeshPart.VertexBuffer);
+                                    _graphicsDevice.Indices = modelMeshPart.IndexBuffer;
+                        
+                                    Matrix modelMat = mesh.ParentBone.Transform * drawEffectMesh.Matrix;
+                                    effect.Parameters["WorldInverseTranspose"].SetValue(Matrix.Transpose(Matrix.Invert(modelMat)));
+                                    effect.Parameters["World"].SetValue(modelMat);
+                        
+                                    for (int j = 0; j < effect.CurrentTechnique.Passes.Count; j++)
+                                    {
+                                        effect.CurrentTechnique.Passes[j].Apply();
+                                        _graphicsDevice.DrawIndexedPrimitives(PrimitiveType.TriangleList, modelMeshPart.VertexOffset, modelMeshPart.StartIndex, modelMeshPart.PrimitiveCount);
+                                    }
+                                }
                             }
-                            mesh.Draw();
                         }
                         break;
                     case RenderMessageType.DrawQuad:
