@@ -31,12 +31,12 @@ namespace Project2.Engine.Components
             _mesh = _entity.GetComponent<MeshComponent>();
         }
 
-        public override void Draw(RenderingSystem system, ref Camera cam)
+        public override void Draw(ref Camera cam)
         {
             if (!IsActive)
                 return;
 
-            system.EnqueueMessage(new RenderMessageDrawMesh(_mesh.Model, Transparency, Color, _entity.Position.TransformMatrix));
+            Render.EnqueueMessage(new RenderMessageDrawMesh(_mesh.Model, Transparency, Color, _entity.Position.TransformMatrix));
         }
 
         private void DebugDraw()
@@ -45,7 +45,7 @@ namespace Project2.Engine.Components
             Vector3 pos = (bb.Max + bb.Min) / 2;
             Vector3 halfExtents = (bb.Max - bb.Min) / 2;
             Matrix mat = Matrix.CreateScale(halfExtents) * Matrix.CreateTranslation(pos);
-            _entity.World.Render.EnqueueMessage(new RenderMessageDrawBox(mat));
+            Render.EnqueueMessage(new RenderMessageDrawBox(mat));
         }
 
         public override bool IsVisible(ref Camera cam)

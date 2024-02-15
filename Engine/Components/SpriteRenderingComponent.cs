@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework.Graphics;
 using Project1.Engine.Systems;
 using Project1.Engine.Systems.RenderMessages;
+using Project2.Engine;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,12 +25,12 @@ namespace Project1.Engine.Components
 
         }
 
-        public override void Draw(RenderingSystem system, ref Camera cam)
+        public override void Draw(ref Camera cam)
         {
             var newPos = cam.WorldToScreen(_entity.Position.Position);
             float depth = Vector3.DistanceSquared(_entity.Position.Position, cam.Translation);
             Rectangle r = new Rectangle((int)newPos.X, (int)newPos.Y, (int)(30 * (1 - newPos.Z)), (int)(30 * (1 - newPos.Z)));
-            system.EnqueueMessage(new RenderMessageDrawSprite(_assetName, r, depth));
+            Render.EnqueueMessage(new RenderMessageDrawSprite(_assetName, r, depth));
         }
 
         // public void DebugDraw(ref SpriteBatch batch, ref GraphicsDevice graphics, ref Camera cam)

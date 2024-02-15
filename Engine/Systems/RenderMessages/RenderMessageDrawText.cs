@@ -13,7 +13,7 @@ namespace Project1.Engine.Systems.RenderMessages
         Centered,
     }
 
-    internal class RenderMessageDrawText : RenderMessageDepth
+    internal class RenderMessageDrawText : RenderMessageSprite
     {
         public string Text { get; private set; }
         public string Font { get; private set; }
@@ -21,7 +21,7 @@ namespace Project1.Engine.Systems.RenderMessages
         public Vector2 Pos { get; private set; }
         public Color Color { get; private set; }
         public TextDrawOptions DrawOptions { get; private set; }
-        public RenderMessageDrawText(string font, string text, float scale, float depth, Vector2 pos, Color color, TextDrawOptions drawOptions = TextDrawOptions.Default) : base(depth, RenderMessageType.DrawText)
+        public RenderMessageDrawText(string font, string text, float scale, float depth, Vector2 pos, Color color, TextDrawOptions drawOptions = TextDrawOptions.Default, string RenderTarget = null) : base(depth, RenderTarget, RenderMessageType.DrawText)
         {
             this.Font = font;
             this.Text = text;

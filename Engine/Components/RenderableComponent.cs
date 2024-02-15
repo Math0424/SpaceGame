@@ -13,6 +13,6 @@ namespace Project1.Engine.Components
     {
         public bool Visible = true;
         public abstract bool IsVisible(ref Camera cam);
-        public abstract void Draw(RenderingSystem system, ref Camera cam);
+        public abstract void Draw(ref Camera cam);
     }
 }

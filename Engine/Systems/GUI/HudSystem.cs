@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Project1.Engine.Systems.RenderMessages;
+using Project2.Engine;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -28,8 +29,8 @@ namespace Project1.Engine.Systems.GUI
         {
             _game = game;
             _render = render;
-            if (!_render.GraphicsReady)
-                _render.OnGraphicsReady += GraphicInit;
+            if (!Render.IsReady)
+                Render.GraphicsReady += GraphicInit;
             else
                 GraphicInit();
         }
@@ -43,7 +44,7 @@ namespace Project1.Engine.Systems.GUI
                 InputEnabled = true,
                 Position = ScreenCenter,
             };
-            _render.EnqueueMessage(new RenderMessageLoadTexture("Textures/GUI/ColorableSprite"));
+            Render.EnqueueMessage(new RenderMessageLoadTexture("Textures/GUI/ColorableSprite"));
         }
 
         public void Draw(GameTime delta)
@@ -55,18 +56,18 @@ namespace Project1.Engine.Systems.GUI
         public void DrawSprite(string sprite, Vector2I pos, Vector2I bounds, float depth)
         {
             Rectangle rec = new Rectangle(pos.X - bounds.X / 2, pos.Y - bounds.Y / 2, bounds.X, bounds.Y);
-            _render.EnqueueMessage(new RenderMessageDrawSprite(sprite, rec, depth));
+            Render.EnqueueMessage(new RenderMessageDrawSprite(sprite, rec, depth));
         }
 
         public void DrawColoredSprite(string sprite, Vector2I pos, Vector2I bounds, float depth, Color color)
         {
             Rectangle rec = new Rectangle(pos.X - bounds.X / 2, pos.Y - bounds.Y / 2, bounds.X, bounds.Y);
-            _render.EnqueueMessage(new RenderMessageDrawColoredSprite(sprite, rec, depth, color));
+            Render.EnqueueMessage(new RenderMessageDrawColoredSprite(sprite, rec, depth, color));
         }
 
         public void DrawText(string font, string text, float scale, float depth, Vector2I pos, Color color, TextDrawOptions options = TextDrawOptions.Default)
         {
-            _render.EnqueueMessage(new RenderMessageDrawText(font, text, scale, depth, pos, color, options));
+            Render.EnqueueMessage(new RenderMessageDrawText(font, text, scale, depth, pos, color, options));
         }
 
         public override void Update(GameTime delta)

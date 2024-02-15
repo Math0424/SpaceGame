@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework.Graphics;
 using Project1.Engine.Systems;
 using Project1.Engine.Systems.RenderMessages;
+using Project2.Engine;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -29,10 +30,10 @@ namespace Project1.Engine.Components
 
         public override void Initalize()
         {
-            _entity.World.Render.EnqueueMessage(new RenderMessageLoadTexture(_assetName));
+            Render.EnqueueMessage(new RenderMessageLoadTexture(_assetName));
         }
 
-        public override void Draw(RenderingSystem rendering, ref Camera cam)
+        public override void Draw(ref Camera cam)
         {
             Matrix mat;
             switch (_option)
@@ -40,11 +41,11 @@ namespace Project1.Engine.Components
                 case BillboardOption.CameraFacing:
                     mat = cam.WorldMatrix;
                     mat.Translation = _entity.Position.Position;
-                    rendering.EnqueueMessage(new RenderMessageDrawQuad(_assetName, false, mat));
+                    Render.EnqueueMessage(new RenderMessageDrawQuad(_assetName, false, mat));
                     break;
                 case BillboardOption.EntityFacing:
                     mat = _entity.Position.TransformMatrix;
-                    rendering.EnqueueMessage(new RenderMessageDrawQuad(_assetName, true, mat));
+                    Render.EnqueueMessage(new RenderMessageDrawQuad(_assetName, true, mat));
                     break;
             }
         }

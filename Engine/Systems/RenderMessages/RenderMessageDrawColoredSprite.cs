@@ -7,12 +7,12 @@ using System.Threading.Tasks;
 
 namespace Project1.Engine.Systems.RenderMessages
 {
-    internal class RenderMessageDrawColoredSprite : RenderMessageDepth
+    internal class RenderMessageDrawColoredSprite : RenderMessageSprite
     {
         public Rectangle Rectangle { get; private set; }
         public string Texture { get; private set; }
         public Color Color { get; private set; }
-        public RenderMessageDrawColoredSprite(string texture, Rectangle rectangle, float depth, Color color) : base(depth, RenderMessageType.DrawColoredSprite)
+        public RenderMessageDrawColoredSprite(string texture, Rectangle rectangle, float depth, Color color, string RenderTarget = null) : base(depth, RenderTarget, RenderMessageType.DrawColoredSprite)
         {
             this.Texture = texture;
             this.Rectangle = rectangle;

@@ -30,7 +30,7 @@ namespace Project1.Engine.Systems
         private const float physicsTimeStep = 0.005f;
 
         private bool _debugMode;
-        private RenderingSystem _render;
+        private Camera _camera;
 
         private CollisionConfiguration _collisionConfiguration;
         private CollisionDispatcher _dispatcher;
@@ -44,12 +44,11 @@ namespace Project1.Engine.Systems
             _broadphase.Dispose();
         }
 
-        public PhysicsSystem(World world, RenderingSystem render)
+        public PhysicsSystem(World world, Camera camera)
         {
             _world = world;
             _debugMode = false;
-            _render = render;
-            _render.DoDraw += DebugDraw;
+            _camera = camera;
 
             _collisionConfiguration = new DefaultCollisionConfiguration();
             _dispatcher = new CollisionDispatcher(_collisionConfiguration);
@@ -62,14 +61,14 @@ namespace Project1.Engine.Systems
         {
             if (_debugMode)
             {
-                DrawingUtils.DrawWorldText(_render, $"{World.NumCollisionObjects} physics objects", Vector3.Zero, Color.Thistle);
+                DrawingUtils.DrawWorldText(_camera, $"{World.NumCollisionObjects} physics objects", Vector3.Zero, Color.Thistle);
 
                 var physicsObjects = _world.GetEntityComponents<PrimitivePhysicsComponent>();
                 if (physicsObjects == null)
                     return;
 
                 foreach (var physicObject in physicsObjects)
-                    physicObject.DebugDraw(_render);
+                    physicObject.DebugDraw();
             }
         }
 

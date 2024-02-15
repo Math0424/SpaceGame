@@ -6,6 +6,7 @@ using Project1.Engine.Components;
 using Project1.Engine.Systems;
 using Project1.Engine.Systems.GUI;
 using Project1.MyGame;
+using Project2.Engine;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -22,6 +23,8 @@ namespace Project1
             //Window.AllowUserResizing = true;
 
             IsMouseVisible = true;
+
+            Render.Initalize(this);
             LoadMainMenu();
         }
 

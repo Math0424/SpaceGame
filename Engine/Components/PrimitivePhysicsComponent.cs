@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using Project1.Engine.Systems;
 using Project1.Engine.Systems.RenderMessages;
 using BulletSharp;
+using Project2.Engine;
 
 namespace Project1.Engine.Components
 {
@@ -165,14 +166,14 @@ namespace Project1.Engine.Components
             _rigidBody.ApplyImpulse(force.ToBullet(), relPos.ToBullet());
         }
 
-        public void DebugDraw(RenderingSystem render)
+        public void DebugDraw()
         {
             var pos = _entity.Position;
 
             if (Vector3.Dot(_entity.World.Render.Camera.Forward, _entity.World.Render.Camera.Translation - pos.Position) > .5f)
                 return;
 
-            DrawingUtils.DrawMatrix(render, pos.WorldMatrix);
+            DrawingUtils.DrawMatrix(pos.WorldMatrix);
 
             // BulletSharp.Math.Vector3 bMin;
             // BulletSharp.Math.Vector3 bMax;
@@ -188,16 +189,16 @@ namespace Project1.Engine.Components
             boxMatrix.Forward /= 2;
             boxMatrix.Right /= 2;
             boxMatrix.Up /= 2;
-            render.EnqueueMessage(new RenderMessageDrawBox(boxMatrix));
+            Render.EnqueueMessage(new RenderMessageDrawBox(boxMatrix));
 
             if (_flags != RigidBodyFlags.Static)
             {
-                DrawingUtils.DrawLine(render, pos.Position, _rigidBody.AngularVelocity.ToXNA(), Color.Orange);
-                DrawingUtils.DrawLine(render, pos.Position, _rigidBody.LinearVelocity.ToXNA(), Color.Pink);
-                DrawingUtils.DrawWorldText(render, $"ID: {_entity.Id}\n AngV: {Math.Round(_rigidBody.AngularVelocity.Length, 2)}\nLinV: {Math.Round(_rigidBody.LinearVelocity.Length, 2)}", pos.Position, IsSleeping ? Color.Blue : Color.Orange);
+                DrawingUtils.DrawLine(pos.Position, _rigidBody.AngularVelocity.ToXNA(), Color.Orange);
+                DrawingUtils.DrawLine(pos.Position, _rigidBody.LinearVelocity.ToXNA(), Color.Pink);
+                DrawingUtils.DrawWorldText(_entity.World.Render.Camera, $"ID: {_entity.Id}\n AngV: {Math.Round(_rigidBody.AngularVelocity.Length, 2)}\nLinV: {Math.Round(_rigidBody.LinearVelocity.Length, 2)}", pos.Position, IsSleeping ? Color.Blue : Color.Orange);
             }
             else
-                DrawingUtils.DrawWorldText(render, $"ID: {_entity.Id}", pos.Position, Color.Yellow);
+                DrawingUtils.DrawWorldText(_entity.World.Render.Camera, $"ID: {_entity.Id}", pos.Position, Color.Yellow);
         }
 
         public void Stop()

@@ -32,6 +32,9 @@ namespace Project1.Engine.Systems.RenderMessages
 
         Load = 1 << 14,
         Depth = 1 << 15,
+
+        CreateRT = 1 << 16 | Load,
+        DisposeRT = 1 << 17 | Load,
     }
 
     internal abstract class RenderMessage

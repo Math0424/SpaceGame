@@ -3,6 +3,7 @@ using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Project1.Engine.Systems;
 using Project1.Engine.Systems.RenderMessages;
+using Project2.Engine;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -77,11 +78,11 @@ namespace Project1.Engine.Components
         public override void Initalize()
         {
             if (_info.Texture_ADD != null)
-                _entity.World.Render.EnqueueMessage(new RenderMessageLoadTexture(_info.Texture_ADD));
+                Render.EnqueueMessage(new RenderMessageLoadTexture(_info.Texture_ADD));
             if (_info.Texture_CM != null)
-                _entity.World.Render.EnqueueMessage(new RenderMessageLoadTexture(_info.Texture_CM));
+                Render.EnqueueMessage(new RenderMessageLoadTexture(_info.Texture_CM));
 
-            _entity.World.Render.EnqueueMessage(new RenderMessageLoadMesh(_info.Name));
+            Render.EnqueueMessage(new RenderMessageLoadMesh(_info.Name));
             _entity.Position.UpdatedTransforms += UpdateAABB;
             SetModel(_info.Name);
         }
