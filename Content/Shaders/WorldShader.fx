@@ -28,17 +28,17 @@ texture Texture_Skybox;
 
 // color
 // rgb - color
-// alpha - metal
-texture Texture_CM;
+// alpha - transparency
+texture Texture_CT;
 // spectular 
 // red - AO
 // green - roughness
-// blue - colorability
-// alpha - transparency
+// blue - metal
+// alpha - colorability
 texture Texture_ADD;
 
-sampler2D Sampler_CM = sampler_state {
-	Texture = (Texture_CM);
+sampler2D Sampler_CT = sampler_state {
+	Texture = (Texture_CT);
 	MinFilter = Linear;
 	MagFilter = Linear;
 	AddressU = Clamp;
@@ -91,7 +91,7 @@ VertexShaderOutput MainVS(in VertexShaderInput input)
 
 float4 MainPS(VertexShaderOutput input) : COLOR0
 { 
-	float4 CM = tex2D(Sampler_CM, input.TextureCoordinate);
+	float4 CT = tex2D(Sampler_CT, input.TextureCoordinate);
 	float4 ADD = tex2D(Sampler_ADD, input.TextureCoordinate);
 
 	float intensity = saturate(dot(input.Normal, DiffuseDirection));
@@ -99,10 +99,10 @@ float4 MainPS(VertexShaderOutput input) : COLOR0
 	float3 diffuse = DiffuseIntensity * DiffuseColor * intensity;
 
 	float3 reflection = normalize(2 * dot(input.Normal, -DiffuseDirection) * input.Normal + DiffuseDirection);
-	float specular = pow(saturate(dot(reflection, input.ViewDir)), CM.a * 5) * (1 - ADD.g);
+	float specular = pow(saturate(dot(reflection, input.ViewDir)), ADD.b) * (1 - ADD.g);
 
-	float4 finalColor = (float4(ambient + diffuse + specular, 1) + CM * ADD.r) + float4(Color * (ADD.b), 1);
-	finalColor.a = ADD.a * Transparency;
+	float4 finalColor = (float4(ambient + diffuse + specular, 1) * CT * ADD.r) + float4(Color * (1 - ADD.a), 1) ;
+	finalColor.a = CT.a * Transparency;
     return finalColor;
 }
 

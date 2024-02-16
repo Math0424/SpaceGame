@@ -281,7 +281,7 @@
 /processorParam:TextureFormat=Color
 /build:Textures/GUI/ColorableSprite.png
 
-#begin Textures/Ring/ring_ADD.png
+#begin Textures/no_ADD.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -291,9 +291,9 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:Textures/Ring/ring_ADD.png
+/build:Textures/no_ADD.png
 
-#begin Textures/Ring/ring_CM.png
+#begin Textures/Ring/ADD_Ring.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -303,7 +303,19 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:Textures/Ring/ring_CM.png
+/build:Textures/Ring/ADD_Ring.png
+
+#begin Textures/Ring/CT_Ring.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:Textures/Ring/CT_Ring.png
 
 #begin Textures/Shotgun/shotgun_ADD.png
 /importer:TextureImporter
@@ -329,7 +341,7 @@
 /processorParam:TextureFormat=Color
 /build:Textures/Shotgun/shotgun_CM.png
 
-#begin Textures/Spaceship/ship_ADD.png
+#begin Textures/Spaceship/ADD.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -339,9 +351,9 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:Textures/Spaceship/ship_ADD.png
+/build:Textures/Spaceship/ADD.png
 
-#begin Textures/Spaceship/ship_CM.png
+#begin Textures/Spaceship/CT.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -351,5 +363,5 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:Textures/Spaceship/ship_CM.png
+/build:Textures/Spaceship/CT.png
 

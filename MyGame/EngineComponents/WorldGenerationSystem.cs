@@ -73,7 +73,7 @@ namespace Project1.MyGame
 
             _world.CreateEntity()
                 .AddComponent(new PositionComponent(transform))//, Matrix.CreateScale(0.01f)))
-                .AddComponent(new MeshComponent("Models/ring", "Textures/Ring/ring_CM", "Textures/Ring/ring_ADD"))
+                .AddComponent(new MeshComponent("Models/ring", "Textures/Ring/CT_ring", "Textures/Ring/ADD_ring"))
                 .AddComponent(new MeshRenderingComponent());
 
             Hitbox[] checkpointBoxes = ReadFile("Hitboxes/Ring.txt");

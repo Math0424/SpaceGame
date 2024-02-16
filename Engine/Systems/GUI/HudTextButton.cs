@@ -22,7 +22,7 @@ namespace Project1.Engine.Systems.GUI
 
         private HudText _hudText;
 
-        public HudTextButton(HudElement parent) : base(parent)
+        public HudTextButton(HudNode parent) : base(parent)
         {
             _hudText = new HudText(this)
             {

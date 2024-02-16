@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework.Input;
 using Project1.Engine;
 using Project1.Engine.Components;
+using Project2.MyGame.GUIElements;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,7 +23,7 @@ namespace Project2.MyGame.EngineComponents
 
         private const float DAMPENING_SPEED = 10;
         private const float ROTATION_SPEED = 10;
-        private const float ACCELERATION_SPEED = 20;
+        private const float ACCELERATION_SPEED = 100;
 
         public SpaceshipController(Matrix localCameraMatrix)
         {

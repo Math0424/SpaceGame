@@ -97,6 +97,8 @@ namespace Project2.Engine
             ScreenBounds = new Vector2I(_graphicsDevice.Viewport.Width, _graphicsDevice.Viewport.Height);
             EnqueueMessage(new RenderMessageCreateRT("default", ScreenBounds));
 
+            EnqueueMessage(new RenderMessageLoadTexture("Textures/no_ADD"));
+
             IsReady = true;
             GraphicsReady?.Invoke();
         }
@@ -210,6 +212,7 @@ namespace Project2.Engine
                         break;
                     case RenderMessageType.CreateRT:
                         var createRt = ((RenderMessageCreateRT)message);
+                        Console.WriteLine($"Creating render target {createRt.Name} : {createRt.Bounds}");
                         if (!_renderTargets.ContainsKey(createRt.Name))
                             _renderTargets[createRt.Name] = new RenderTarget2D(_graphicsDevice, createRt.Bounds.X, createRt.Bounds.Y);
                         break;
@@ -265,16 +268,27 @@ namespace Project2.Engine
                         effect.Parameters["Transparency"].SetValue(drawEffectMesh.Transparency);
                         effect.Parameters["Color"].SetValue(drawEffectMesh.Color.ToVector3());
 
-                        if (drawEffectMesh.Model.Texture_CM != null)
-                            effect.Parameters["Texture_CM"].SetValue(Asset<Texture2D>(drawEffectMesh.Model.Texture_CM));
+                        if (drawEffectMesh.Model.Texture_CT != null)
+                            effect.Parameters["Texture_CT"].SetValue(Asset<Texture2D>(drawEffectMesh.Model.Texture_CT));
 
-                        if (drawEffectMesh.Model.Texture_ADD != null)
-                            effect.Parameters["Texture_ADD"].SetValue(Asset<Texture2D>(drawEffectMesh.Model.Texture_ADD));
+                        if (drawEffectMesh.Model.Texture_ADD == null)
+                            effect.Parameters["Texture_ADD"].SetValue(Asset<Texture2D>("Textures/no_ADD"));
 
                         effect.CurrentTechnique = effect.Techniques[1];
                         var model = drawEffectMesh.Model.Model;
                         foreach (ModelMesh mesh in model.Meshes)
                         {
+                            string name = mesh.Name.ToLower();
+                            if (name.StartsWith("panel_"))
+                            {
+                                effect.Parameters["Texture_CT"].SetValue(_renderTargets[name.Substring(6)]);
+                                effect.Parameters["Texture_ADD"].SetValue(Asset<Texture2D>("Textures/no_ADD"));
+                            }
+                            else if(drawEffectMesh.Model.Texture_ADD != null)
+                            {
+                                effect.Parameters["Texture_ADD"].SetValue(Asset<Texture2D>(drawEffectMesh.Model.Texture_ADD));
+                            }
+
                             for (int i = 0; i < mesh.MeshParts.Count; i++)
                             {
                                 ModelMeshPart modelMeshPart = mesh.MeshParts[i];

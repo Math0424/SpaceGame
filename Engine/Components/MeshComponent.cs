@@ -15,7 +15,7 @@ namespace Project1.Engine.Components
     struct ModelInfo
     {
         public Model Model;
-        public string Texture_CM;
+        public string Texture_CT;
         public string Texture_ADD;
 
         public string Name;
@@ -43,7 +43,7 @@ namespace Project1.Engine.Components
             _info = new ModelInfo()
             {
                 Name = modelname,
-                Texture_CM = texture_cm,
+                Texture_CT = texture_cm,
                 Texture_ADD = texture_add,
             };
         }
@@ -79,8 +79,8 @@ namespace Project1.Engine.Components
         {
             if (_info.Texture_ADD != null)
                 Render.EnqueueMessage(new RenderMessageLoadTexture(_info.Texture_ADD));
-            if (_info.Texture_CM != null)
-                Render.EnqueueMessage(new RenderMessageLoadTexture(_info.Texture_CM));
+            if (_info.Texture_CT != null)
+                Render.EnqueueMessage(new RenderMessageLoadTexture(_info.Texture_CT));
 
             Render.EnqueueMessage(new RenderMessageLoadMesh(_info.Name));
             _entity.Position.UpdatedTransforms += UpdateAABB;
@@ -136,7 +136,7 @@ namespace Project1.Engine.Components
             {
                 Name = _info.Name,
                 Texture_ADD = _info.Texture_ADD,
-                Texture_CM = _info.Texture_CM,
+                Texture_CT = _info.Texture_CT,
                 Model = model,
                 Verticies = verticies,
                 Center = (min + max) / 2,

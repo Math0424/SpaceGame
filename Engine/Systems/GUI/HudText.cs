@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Project1.Engine.Systems.GUI
 {
-    internal class HudText : HudElement
+    internal class HudText : HudNode
     {
         public Color TextColor;
         public string Text;
@@ -16,7 +16,7 @@ namespace Project1.Engine.Systems.GUI
         public Vector2I TextOffset;
         public TextDrawOptions TextOptions;
 
-        public HudText(HudElement parent) : base(parent)
+        public HudText(HudNode parent) : base(parent)
         {
             TextColor = Color.Black;
             TextScale = 1;
@@ -27,7 +27,15 @@ namespace Project1.Engine.Systems.GUI
         public override void Draw(float deltaTime)
         {
             if (Text != null)
-                _core.Root.DrawText("Fonts/Debug", Text, TextScale, zOffset, Position - TextOffset, TextColor, TextOptions);
+                DrawText("Fonts/Debug", Text, TextScale, zOffset, Position - TextOffset, TextColor, TextOptions);
+        }
+
+        public override void HandleInput(ref HudInput input)
+        {
+        }
+
+        public override void Layout()
+        {
         }
     }
 }

@@ -4,6 +4,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Project1.Engine.Components;
 using Project1.Engine.Systems.RenderMessages;
+using Project2.Engine;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,11 +13,6 @@ using System.Threading.Tasks;
 
 namespace Project1.Engine.Systems
 {
-    // General concepts taken from
-    // https://theswissbay.ch/pdf/Gentoomen%20Library/Game%20Development/Programming/Game%20Physics%20Engine%20Development.pdf
-    // http://www.r-5.org/files/books/computers/algo-list/realtime-3d/Christer_Ericson-Real-Time_Collision_Detection-EN.pdf
-    // http://www.chrishecker.com/images/b/bb/Gdmphys4.pdf
-
     internal class PhysicsSystem : SystemComponent
     {
         public DiscreteDynamicsWorld World;
@@ -42,6 +38,7 @@ namespace Project1.Engine.Systems
             _collisionConfiguration.Dispose();
             _dispatcher.Dispose();
             _broadphase.Dispose();
+            Render.PreDraw -= DebugDraw;
         }
 
         public PhysicsSystem(World world, Camera camera)
@@ -55,6 +52,8 @@ namespace Project1.Engine.Systems
             _broadphase = new DbvtBroadphase();
             World = new DiscreteDynamicsWorld(_dispatcher, _broadphase, null, _collisionConfiguration);
             World.Gravity = new BulletSharp.Math.Vector3(0, 0, 0);
+
+            Render.PreDraw += DebugDraw;
         }
 
         public void DebugDraw()

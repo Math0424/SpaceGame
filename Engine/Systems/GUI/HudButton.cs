@@ -7,10 +7,11 @@ using System.Threading.Tasks;
 
 namespace Project1.Engine.Systems.GUI
 {
-    internal class HudButton : HudElement
+    internal class HudButton : HudNode
     {
         public Color HoverColor;
         public Color PressedColor;
+        public Color Color;
 
         public Action<object> OnHovered;
         public Action<object> OnRightClicked;
@@ -20,8 +21,9 @@ namespace Project1.Engine.Systems.GUI
         protected bool _isPressed;
         private bool _wasWithinBounds;
 
-        public HudButton(HudElement parent) : base(parent) 
+        public HudButton(HudNode parent) : base(parent) 
         {
+            Color = Color.White;
             HoverColor = Color.Gray;
             PressedColor = Color.DarkSlateGray;
         }
@@ -65,12 +67,16 @@ namespace Project1.Engine.Systems.GUI
         public override void Draw(float deltaTime)
         {
             if (_isPressed)
-                _core.Root.DrawColoredSprite("Textures/GUI/ColorableSprite", Position, Bounds, zOffset, PressedColor);
+                DrawColoredSprite("Textures/GUI/ColorableSprite", Position, Bounds, zOffset, PressedColor);
             else if(_isHovered)
-                _core.Root.DrawColoredSprite("Textures/GUI/ColorableSprite", Position, Bounds, zOffset, HoverColor);
+                DrawColoredSprite("Textures/GUI/ColorableSprite", Position, Bounds, zOffset, HoverColor);
             else
-                base.Draw(deltaTime);
+                DrawColoredSprite("Textures/GUI/ColorableSprite", Position, Bounds, zOffset, Color);
         }
 
+        public override void Layout()
+        {
+            
+        }
     }
 }

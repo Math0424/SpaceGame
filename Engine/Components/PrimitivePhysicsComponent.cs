@@ -170,7 +170,8 @@ namespace Project1.Engine.Components
         {
             var pos = _entity.Position;
 
-            if (Vector3.Dot(_entity.World.Render.Camera.Forward, _entity.World.Render.Camera.Translation - pos.Position) > .5f)
+            if (Vector3.Dot(_entity.World.Render.Camera.Forward, _entity.World.Render.Camera.Translation - pos.Position) > .5f ||
+                (_entity.World.Render.Camera.Translation - pos.Position).LengthSquared() > 1000 * 1000)
                 return;
 
             DrawingUtils.DrawMatrix(pos.WorldMatrix);

@@ -3,6 +3,7 @@ using Project1.Engine;
 using Project1.Engine.Components;
 using Project1.Engine.Systems;
 using Project1.Engine.Systems.RenderMessages;
+using Project2.Engine.Systems.RenderMessages;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -29,6 +30,12 @@ namespace Project2.Engine.Components
         public override void Initalize()
         {
             _mesh = _entity.GetComponent<MeshComponent>();
+            foreach (var mesh in _mesh.Model.Model.Meshes)
+            {
+                string name = mesh.Name.ToLower();
+                if (name.StartsWith("panel_"))
+                    Render.EnqueueMessage(new RenderMessageCreateRT(name.Substring(6), new Vector2I(256, 256)));
+            }
         }
 
         public override void Draw(ref Camera cam)

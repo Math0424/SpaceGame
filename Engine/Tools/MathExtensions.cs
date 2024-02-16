@@ -32,8 +32,20 @@ namespace Project1.Engine
             return new Vector2I(v1.X - v2.X, v1.Y - v2.Y);
         }
 
+        public static Vector2I operator /(Vector2I v1, int val)
+        {
+            return new Vector2I(v1.X / val, v1.Y / val);
+        }
+
+        public static Vector2I operator *(Vector2I v1, int val)
+        {
+            return new Vector2I(v1.X * val, v1.Y * val);
+        }
+
         public static implicit operator Vector2(Vector2I v) => new Vector2(v.X, v.Y);
         public static explicit operator Vector2I(Vector2 v) => new Vector2I((int)v.X, (int)v.Y);
+
+        public static Vector2I Zero = new Vector2I(0, 0);
     }
 
     internal static class MathExtensions
@@ -157,6 +169,12 @@ namespace Project1.Engine
                               -v.Z, 0, v.X, 0, 
                               v.Y, -v.X, 0, 0, 
                               0,   0,   0,  0);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static string ToShortString(this Vector3 vec)
+        {
+            return $"[{Math.Round(vec.X, 2)}, {Math.Round(vec.Y, 2)}, {Math.Round(vec.Z, 2)}]";
         }
 
         public static float GetIndex(this Vector3 v, int i)
