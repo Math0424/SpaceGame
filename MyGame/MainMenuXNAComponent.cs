@@ -56,7 +56,7 @@ namespace Project1.MyGame
 
             spaceship.GetComponent<MeshAnimationComponent>().LoadAnimation("openCockpit", "Animations/OpenCockpit.txt");
 
-            manager.CreateWorld(30, 1);
+            manager.CreateWorld(11, 1);
         }
 
         public override void Update(GameTime gameTime)

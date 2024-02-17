@@ -46,25 +46,33 @@ namespace Project1.MyGame
             Random r = new Random(seed);
             Vector3[] randomPoints = new Vector3[checkpoints];
 
-            Console.WriteLine($"Creating a world with {checkpoints} checkpoints");
+            Console.WriteLine($"Creating a world {checkpoints}:{Math.Round(distanceScaling, 2)}:{seed}");
 
-            Vector3 dir = Vector3.Forward;
+            Vector3 normal = Vector3.Right;
             Vector3 currPos = Vector3.Zero;
-            float distanceBetween = 10;
+            float distanceBetween = Math.Clamp(50 * distanceScaling, 20, 100);
             for(int i = 1; i < checkpoints; i++)
             {
-                currPos += dir * distanceBetween * distanceScaling;
-                float offset = distanceBetween / (10 * (1 - distanceScaling) + .1f);
-                currPos += new Vector3((float)r.NextDouble() * offset, (float)r.NextDouble() * offset, (float)r.NextDouble() * offset);
+                currPos += normal * distanceBetween;
+
+                Vector3 tangent = Vector3.Normalize(Vector3.Cross(normal, Vector3.Up));
+                Vector3 biTangent = Vector3.Normalize(Vector3.Cross(normal, tangent));
+
+                float offset = 50 * distanceScaling;
+                float randomTangent = (float)r.NextDouble() * offset;
+                float randomBiTangent = (float)r.NextDouble() * offset;
+
+                currPos += (tangent * randomTangent) + (biTangent * randomBiTangent);
+
                 randomPoints[i] = currPos;
-                dir = Vector3.Normalize(randomPoints[i] - randomPoints[i - 1]);
+                normal = Vector3.Normalize(randomPoints[i] - randomPoints[i - 1]);
             }
 
             _checkpoints.Add(Vector4.Zero);
             Vector3[] arrowPoints = MathExtensions.CatmullRom(randomPoints, .25f);
             for (int i = 1; i < arrowPoints.Length - 1; i++)
             {
-                Vector3 normal = Vector3.Normalize(arrowPoints[i + 1] - arrowPoints[i - 1]);
+                normal = Vector3.Normalize(arrowPoints[i + 1] - arrowPoints[i - 1]);
                 Vector3 pos = arrowPoints[i];
 
                 if (i % 4 == 0)

@@ -257,6 +257,18 @@
 /processorParam:TextureFormat=Color
 /build:Textures/Arrow/arrow_CM.png
 
+#begin Textures/GUI/arrow.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:Textures/GUI/arrow.png
+
 #begin Textures/GUI/circle.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -280,6 +292,18 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:Textures/GUI/ColorableSprite.png
+
+#begin Textures/GUI/GPS.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:Textures/GUI/GPS.png
 
 #begin Textures/no_ADD.png
 /importer:TextureImporter

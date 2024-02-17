@@ -55,7 +55,7 @@ namespace Project2.MyGame.EngineComponents
         {
             if (ent == _physics.EntityId)
                 if (val > 3)
-                    Health -= val / 1000;
+                    Health -= val / 600;
         }
 
         public override void Update(GameTime deltaTime)
