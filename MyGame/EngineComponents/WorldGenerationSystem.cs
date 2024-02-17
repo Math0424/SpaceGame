@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using BulletSharp;
+using Microsoft.Xna.Framework;
 using Project1.Engine;
 using Project1.Engine.Components;
 using Project1.Engine.Systems.RenderMessages;
@@ -55,7 +56,6 @@ namespace Project1.MyGame
                     SpawnCheckpoint(pos, normal);
                 else
                 {
-                    _checkpoints.Add(pos);
                     Matrix transform = Matrix.CreateWorld(pos, normal, Vector3.Cross(pos, normal));
                     _world.CreateEntity()
                             .AddComponent(new PositionComponent(transform, Matrix.CreateScale(0.01f)))
@@ -79,12 +79,18 @@ namespace Project1.MyGame
             Hitbox[] checkpointBoxes = ReadFile("Hitboxes/Ring.txt");
             foreach(var x in checkpointBoxes)
             {
+                Matrix translate = Matrix.CreateScale(x.Scale) * x.Rotation * Matrix.CreateTranslation(x.Position);
                 if (x.Name.ToLower() == "box")
                 {
-                    Matrix translate = Matrix.CreateScale(x.Scale) * x.Rotation * Matrix.CreateTranslation(x.Position);
                     _world.CreateEntity()
                         .AddComponent(new PositionComponent(translate * transform))
                         .AddComponent(new PrimitivePhysicsComponent(RigidBodyType.Box));
+                }
+                else if(x.Name.ToLower() == "trigger")
+                {
+                    _world.CreateEntity()
+                        .AddComponent(new PositionComponent(translate * transform))
+                        .AddComponent(new PrimitivePhysicsComponent(RigidBodyType.Box, CollisionFlags.NoContactResponse));
                 }
             }
         }

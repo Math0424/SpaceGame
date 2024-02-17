@@ -38,7 +38,7 @@ namespace Project2.MyGame.EngineComponents
             else
             {
                 _render.Visible = true;
-                _render.Transparency = Math.Clamp(dist / 3000, 0, 0.75f);
+                _render.Transparency = Math.Clamp(dist / 3000, 0, 0.25f);
             }
         }
     }

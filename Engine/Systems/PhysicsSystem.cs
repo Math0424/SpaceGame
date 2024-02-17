@@ -93,11 +93,14 @@ namespace Project1.Engine.Systems
             for (int i = 0; i < World.Dispatcher.NumManifolds; i++)
             {
                 PersistentManifold contactManifold = World.Dispatcher.GetManifoldByIndexInternal(i);
-                CollisionObject obA = contactManifold.Body0;
-                CollisionObject obB = contactManifold.Body1;
-                
-                ManifoldPoint pt = contactManifold.GetContactPoint(0);
-                Collision?.Invoke(obA.UserIndex, obB.UserIndex, pt.PositionWorldOnA.ToXNA(), pt.NormalWorldOnB.ToXNA(), (float)pt.AppliedImpulse);
+                Console.WriteLine(contactManifold.NumContacts);
+                if (contactManifold.NumContacts != 0)
+                {
+                    CollisionObject obA = contactManifold.Body0;
+                    CollisionObject obB = contactManifold.Body1;
+                    ManifoldPoint pt = contactManifold.GetContactPoint(0);
+                    Collision?.Invoke(obA.UserIndex, obB.UserIndex, pt.PositionWorldOnA.ToXNA(), pt.NormalWorldOnB.ToXNA(), (float)pt.AppliedImpulse);
+                }
             }
 
         }

@@ -42,7 +42,7 @@ namespace Project1.MyGame
 
             var spaceship = _world.CreateEntity()
                 .AddComponent(new PositionComponent(Matrix.Identity))//, Matrix.CreateScale(0.01f)))
-                .AddComponent(new PrimitivePhysicsComponent(RigidBodyType.Sphere, Engine.Components.RigidBodyFlags.Dynamic, 10))
+                .AddComponent(new PrimitivePhysicsComponent(RigidBodyType.Sphere, 10))
                 .AddComponent(new SpaceshipController(Matrix.CreateTranslation(new Vector3(0, 0.4f, 0.7f))))
                 .AddComponent(new MeshComponent("Models/Cockpit", "Textures/Spaceship/CT", "Textures/Spaceship/ADD"))
                 .AddComponent(new MeshRenderingComponent())

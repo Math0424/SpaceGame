@@ -302,7 +302,7 @@ namespace Project2.Engine
                         effect.Parameters["DiffuseIntensity"].SetValue(0.8f);
 
                         effect.Parameters["AmbientColor"].SetValue(new Vector3(1, 1, 1));
-                        effect.Parameters["AmbientIntensity"].SetValue(0.1f);
+                        effect.Parameters["AmbientIntensity"].SetValue(0.5f);
 
                         effect.Parameters["Transparency"].SetValue(drawEffectMesh.Transparency);
                         effect.Parameters["Color"].SetValue(drawEffectMesh.Color.ToVector3());

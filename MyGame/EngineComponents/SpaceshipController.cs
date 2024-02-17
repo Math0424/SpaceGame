@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework.Input;
 using Project1.Engine;
 using Project1.Engine.Components;
+using Project1.Engine.Systems;
 using Project2.MyGame.GUIElements;
 using System;
 using System.Collections.Generic;
@@ -21,6 +22,8 @@ namespace Project2.MyGame.EngineComponents
         private Matrix _localCameraPos;
         private int _justFocused;
 
+        public float Health;
+
         private const float DAMPENING_SPEED = 10;
         private const float ROTATION_SPEED = 10;
         private const float ACCELERATION_SPEED = 100;
@@ -31,6 +34,7 @@ namespace Project2.MyGame.EngineComponents
             _shipRotation = true;
             _shotgunControl = false;
            _localCameraPos = localCameraMatrix;
+            Health = 1;
         }
 
         private void CenterCursor()
@@ -44,6 +48,14 @@ namespace Project2.MyGame.EngineComponents
         {
             _entity.World.GameFocused += CenterCursor;
             _physics = _entity.GetComponent<PrimitivePhysicsComponent>();
+            _entity.World.GetSystem<PhysicsSystem>().Collision += Collision;
+        }
+
+        public void Collision(int ent, int with, Vector3 pos, Vector3 normal, float val)
+        {
+            if (ent == _physics.EntityId)
+                if (val > 3)
+                    Health -= val / 1000;
         }
 
         public override void Update(GameTime deltaTime)

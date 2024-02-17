@@ -4,6 +4,7 @@ using Project1.Engine.Components;
 using Project1.Engine.Systems.GUI;
 using Project1.Engine.Systems.RenderMessages;
 using Project2.Engine;
+using Project2.MyGame.EngineComponents;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,18 +15,14 @@ namespace Project2.MyGame.GUIElements
 {
     internal class HudHealth : HudNode
     {
-        float _health;
-        private Entity _spaceship;
-        private PrimitivePhysicsComponent _physics;
+        private SpaceshipController _spaceship;
         private HudText _healthOne;
 
         public HudHealth(Entity spaceship, Vector2I bounds, string renderTarget) : base(bounds, renderTarget)
         {
-            _spaceship = spaceship;
-            _physics = spaceship.GetComponent<PrimitivePhysicsComponent>();
+            _spaceship = spaceship.GetComponent<SpaceshipController>();
             _renderTarget = renderTarget;
             Visible = true;
-            _health = 1;
 
             _healthOne = new HudText(this)
             {
@@ -37,17 +34,11 @@ namespace Project2.MyGame.GUIElements
             };
         }
 
-        float time;
         public override void Draw(float deltaTime)
         {
-            time += deltaTime / 10;
-
-            _health = (float)(Math.Sin(time) + 1f) / 2;
-
-            _healthOne.Text = $"Health: {(int)(_health * 100)}";
-
+            _healthOne.Text = $"Health: {(int)(_spaceship.Health * 100)}";
             DrawColoredSprite("Textures/GUI/ColorableSprite", Bounds / 2, Bounds * 2, 50, Color.Red);
-            DrawColoredSprite("Textures/GUI/ColorableSprite", Bounds / 2, new Vector2I((int)(256 * _health), 256), 10, Color.Green);
+            DrawColoredSprite("Textures/GUI/ColorableSprite", Bounds / 2, new Vector2I((int)(256 * _spaceship.Health), 256), 10, Color.Green);
         }
 
         public override void HandleInput(ref HudInput input)

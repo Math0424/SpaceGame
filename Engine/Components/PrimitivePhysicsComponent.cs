@@ -13,13 +13,6 @@ using Project2.Engine;
 
 namespace Project1.Engine.Components
 {
-    public enum RigidBodyFlags
-    {
-        Static,
-        Dynamic,
-        Kinematic,
-    }
-
     internal enum RigidBodyType
     {
         Sphere,
@@ -40,26 +33,29 @@ namespace Project1.Engine.Components
         private float _userRadius;
         private float _userMass;
 
-        private CollisionFilterGroups _physicsFilter;
+        private CollisionFlags _physicsFlags;
+        private CollisionFilterGroups _groupFlags;
+        private CollisionFilterGroups _maskFlags;
         private RigidBodyType _type;
-        private RigidBodyFlags _flags;
 
         private RigidBody _rigidBody;
 
-        public PrimitivePhysicsComponent(RigidBodyType type, CollisionFilterGroups layer = CollisionFilterGroups.AllFilter)
+        public PrimitivePhysicsComponent(RigidBodyType type, CollisionFlags flags = CollisionFlags.StaticObject, CollisionFilterGroups group = CollisionFilterGroups.StaticFilter, CollisionFilterGroups mask = ~CollisionFilterGroups.StaticFilter)
         {
-            _physicsFilter = layer;
+            _physicsFlags = flags;
+            _maskFlags = mask;
+            _groupFlags = group;
             _type = type;
-            _flags = RigidBodyFlags.Static;
             _userRadius = -1;
             _userMass = 0;
         }
 
-        public PrimitivePhysicsComponent(RigidBodyType type, RigidBodyFlags flags, float mass, float radius = -1, CollisionFilterGroups layer = CollisionFilterGroups.AllFilter)
+        public PrimitivePhysicsComponent(RigidBodyType type, float mass, float radius = -1, CollisionFlags layer = CollisionFlags.None, CollisionFilterGroups group = CollisionFilterGroups.DefaultFilter, CollisionFilterGroups mask = CollisionFilterGroups.AllFilter)
         {
-            _physicsFilter = layer;
+            _maskFlags = mask;
+            _groupFlags = group;
+            _physicsFlags = layer;
             _type = type;
-            _flags = flags;
             _userMass = mass;
             _userRadius = radius;
         }
@@ -103,7 +99,7 @@ namespace Project1.Engine.Components
             transform = Matrix.CreateFromQuaternion(quat) * Matrix.CreateTranslation(pos);
 
             //figure out what to do if its kinematic
-            if (_flags == RigidBodyFlags.Static)
+            if (_physicsFlags == CollisionFlags.StaticObject)
             {
                 using (var bodyInfo = new RigidBodyConstructionInfo(0, null, shape)
                 {
@@ -112,7 +108,7 @@ namespace Project1.Engine.Components
                 {
                     _rigidBody = new RigidBody(bodyInfo);
                 }
-            } 
+            }
             else
             {
                 using (var bodyInfo = new RigidBodyConstructionInfo(_userMass, new DefaultMotionState(transform.ToBullet()), shape, shape.CalculateLocalInertia(_userMass))
@@ -127,8 +123,9 @@ namespace Project1.Engine.Components
                 }
             }
             _rigidBody.UserIndex = _entity.Id;
+            _rigidBody.CollisionFlags = _physicsFlags;
 
-            sim.AddRigidBody(_rigidBody, _physicsFilter, CollisionFilterGroups.AllFilter);
+            sim.AddRigidBody(_rigidBody, _groupFlags, _maskFlags);
         }
 
         public void SetWorldMatrix(Matrix matrix)
@@ -138,7 +135,7 @@ namespace Project1.Engine.Components
 
         public void UpdateWorldMatrix()
         {
-            if (_flags == RigidBodyFlags.Static)
+            if (_physicsFlags == CollisionFlags.StaticObject)
                 return;
             _entity.Position.SetWorldMatrix(_rigidBody.WorldTransform.ToXNA());
         }
@@ -192,7 +189,7 @@ namespace Project1.Engine.Components
             boxMatrix.Up /= 2;
             Render.EnqueueMessage(new RenderMessageDrawBox(boxMatrix));
 
-            if (_flags != RigidBodyFlags.Static)
+            if (_physicsFlags != CollisionFlags.StaticObject)
             {
                 DrawingUtils.DrawLine(pos.Position, _rigidBody.AngularVelocity.ToXNA(), Color.Orange);
                 DrawingUtils.DrawLine(pos.Position, _rigidBody.LinearVelocity.ToXNA(), Color.Pink);

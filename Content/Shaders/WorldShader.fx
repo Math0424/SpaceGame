@@ -91,19 +91,20 @@ VertexShaderOutput MainVS(in VertexShaderInput input)
 
 float4 MainPS(VertexShaderOutput input) : COLOR0
 { 
-	float4 CT = tex2D(Sampler_CT, input.TextureCoordinate);
-	float4 ADD = tex2D(Sampler_ADD, input.TextureCoordinate);
+	float4 CTTexture = tex2D(Sampler_CT, input.TextureCoordinate);
+	float4 ADDTexture = tex2D(Sampler_ADD, input.TextureCoordinate);
 
 	float intensity = saturate(dot(input.Normal, DiffuseDirection));
 	float3 ambient = AmbientColor * AmbientIntensity;
-	float3 diffuse = DiffuseIntensity * DiffuseColor * intensity;
+	float3 diffuse = DiffuseColor * intensity * DiffuseIntensity;
 
-	float3 reflection = normalize(2 * dot(input.Normal, -DiffuseDirection) * input.Normal + DiffuseDirection);
-	float specular = pow(saturate(dot(reflection, input.ViewDir)), ADD.b) * (1 - ADD.g);
+	float3 reflection = normalize(reflect(-DiffuseDirection, input.Normal));
+	float specularIntensity = pow(saturate(dot(reflection, input.ViewDir)), ADDTexture.g);
+	float3 specular = specularIntensity * (1 - ADDTexture.g) * ADDTexture.b;
 
-	float4 finalColor = (float4(ambient + diffuse + specular, 1) * CT * ADD.r) + float4(Color * (1 - ADD.a), 1) ;
-	finalColor.a = CT.a * Transparency;
-    return finalColor;
+	float3 finalColorRGB = (ambient + diffuse + specular) * (ADDTexture.a * CTTexture.rgb + (1 - ADDTexture.a) * Color) * ADDTexture.r;
+
+	return float4(finalColorRGB, CTTexture.a * Transparency);
 }
 
 technique Default

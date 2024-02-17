@@ -88,7 +88,7 @@ namespace Project1.Engine.Systems
                 var ent = _world.CreateEntity()
                     .AddComponent(new PositionComponent(_camera.WorldMatrix.Translation + _camera.WorldMatrix.Forward * 5))
                     .AddComponent(new MeshComponent("models/sphere"))
-                    .AddComponent(new PrimitivePhysicsComponent(RigidBodyType.Sphere, RigidBodyFlags.Dynamic, .08f, .3f));
+                    .AddComponent(new PrimitivePhysicsComponent(RigidBodyType.Sphere, .08f, .3f));
                 ent.Position.SetLocalMatrix(Matrix.CreateScale(.2f));
             }
 
