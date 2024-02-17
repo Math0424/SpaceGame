@@ -17,35 +17,50 @@ namespace Project1.MyGame
     internal class WorldGenerationSystem : SystemComponent
     {
 
-        List<Vector3> _checkpoints;
+        public Vector4[] Checkpoints => _checkpoints.ToArray();
+
+        private List<Vector4> _checkpoints;
         private World _world;
         public WorldGenerationSystem(World world)
         {
-            _checkpoints = new List<Vector3>();
+            _checkpoints = new List<Vector4>();
             _world = world;
         }
 
-        public void CreateRandomWorld(float difficulty)
+        public static (byte, float, ushort) DecodeSeed(ulong value)
         {
-            Random r = new Random();
-            int numPoints = Math.Clamp(r.Next((int)(100 * difficulty)), 10, 70);
-            Vector3[] randomPoints = new Vector3[numPoints];
+            return ((byte)(value & byte.MaxValue), BitConverter.ToSingle(BitConverter.GetBytes(value), 1), (ushort)((ushort)(value >> (5 * 8)) & ushort.MaxValue));
+        }
 
-            Console.WriteLine($"Creating a world with {numPoints} checkpoints");
+        public static ulong CreateSeed(byte checkpoints, float distanceScaling, ushort seed)
+        {
+            byte[] ret = new byte[64];
+            BitConverter.GetBytes(checkpoints).CopyTo(ret, 0);
+            BitConverter.GetBytes(distanceScaling).CopyTo(ret, sizeof(byte));
+            BitConverter.GetBytes(seed).CopyTo(ret, sizeof(byte) + sizeof(float));
+            return BitConverter.ToUInt64(ret);
+        }
+
+        public void CreateRandomWorld(byte checkpoints, float distanceScaling, ushort seed)
+        {
+            Random r = new Random(seed);
+            Vector3[] randomPoints = new Vector3[checkpoints];
+
+            Console.WriteLine($"Creating a world with {checkpoints} checkpoints");
 
             Vector3 dir = Vector3.Forward;
             Vector3 currPos = Vector3.Zero;
             float distanceBetween = 10;
-            for(int i = 1; i < numPoints; i++)
+            for(int i = 1; i < checkpoints; i++)
             {
-                currPos += dir * distanceBetween * difficulty;
-                float offset = distanceBetween / (10 * (1 - difficulty) + .1f);
+                currPos += dir * distanceBetween * distanceScaling;
+                float offset = distanceBetween / (10 * (1 - distanceScaling) + .1f);
                 currPos += new Vector3((float)r.NextDouble() * offset, (float)r.NextDouble() * offset, (float)r.NextDouble() * offset);
                 randomPoints[i] = currPos;
                 dir = Vector3.Normalize(randomPoints[i] - randomPoints[i - 1]);
             }
 
-            _checkpoints.Add(Vector3.Zero);
+            _checkpoints.Add(Vector4.Zero);
             Vector3[] arrowPoints = MathExtensions.CatmullRom(randomPoints, .25f);
             for (int i = 1; i < arrowPoints.Length - 1; i++)
             {
@@ -68,7 +83,6 @@ namespace Project1.MyGame
 
         private void SpawnCheckpoint(Vector3 pos, Vector3 normal)
         {
-            _checkpoints.Add(pos);
             Matrix transform = Matrix.CreateWorld(pos, normal, Vector3.Cross(pos, normal));
 
             _world.CreateEntity()
@@ -77,6 +91,8 @@ namespace Project1.MyGame
                 .AddComponent(new MeshRenderingComponent());
 
             Hitbox[] checkpointBoxes = ReadFile("Hitboxes/Ring.txt");
+
+            int triggerId = -1;
             foreach(var x in checkpointBoxes)
             {
                 Matrix translate = Matrix.CreateScale(x.Scale) * x.Rotation * Matrix.CreateTranslation(x.Position);
@@ -88,11 +104,13 @@ namespace Project1.MyGame
                 }
                 else if(x.Name.ToLower() == "trigger")
                 {
-                    _world.CreateEntity()
+                    var trigger = _world.CreateEntity()
                         .AddComponent(new PositionComponent(translate * transform))
                         .AddComponent(new PrimitivePhysicsComponent(RigidBodyType.Box, CollisionFlags.NoContactResponse));
+                    triggerId = trigger.Id;
                 }
             }
+            _checkpoints.Add(new Vector4(pos, triggerId));
         }
 
         private struct Hitbox

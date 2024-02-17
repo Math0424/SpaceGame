@@ -93,7 +93,6 @@ namespace Project1.Engine.Systems
             for (int i = 0; i < World.Dispatcher.NumManifolds; i++)
             {
                 PersistentManifold contactManifold = World.Dispatcher.GetManifoldByIndexInternal(i);
-                Console.WriteLine(contactManifold.NumContacts);
                 if (contactManifold.NumContacts != 0)
                 {
                     CollisionObject obA = contactManifold.Body0;

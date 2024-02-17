@@ -99,7 +99,7 @@ namespace Project1.Engine.Components
             transform = Matrix.CreateFromQuaternion(quat) * Matrix.CreateTranslation(pos);
 
             //figure out what to do if its kinematic
-            if (_physicsFlags == CollisionFlags.StaticObject)
+            if ((_physicsFlags & CollisionFlags.StaticObject) != 0)
             {
                 using (var bodyInfo = new RigidBodyConstructionInfo(0, null, shape)
                 {
@@ -135,7 +135,7 @@ namespace Project1.Engine.Components
 
         public void UpdateWorldMatrix()
         {
-            if (_physicsFlags == CollisionFlags.StaticObject)
+            if ((_physicsFlags & CollisionFlags.StaticObject) != 0)
                 return;
             _entity.Position.SetWorldMatrix(_rigidBody.WorldTransform.ToXNA());
         }

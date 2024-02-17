@@ -32,13 +32,15 @@ namespace Project1.MyGame
                 .AddSystem<RenderingSystem>()
                 .AddSystem<WorldGenerationSystem>()
                 .AddSystem<PhysicsSystem>()
-                .AddSystem<HudSystem>();
+                .AddSystem<HudSystem>()
+                .AddSystem<GameStateManager>();
             game.Components.Add(_world);
         }
 
         public override void Initialize()
         {
             var hud = _world.GetSystem<HudSystem>();
+            var manager = _world.GetSystem<GameStateManager>();
 
             var spaceship = _world.CreateEntity()
                 .AddComponent(new PositionComponent(Matrix.Identity))//, Matrix.CreateScale(0.01f)))
@@ -49,11 +51,12 @@ namespace Project1.MyGame
                 .AddComponent(new MeshAnimationComponent());
 
             hud.RegisterElement(new HudSpeed(spaceship, new Vector2I(256, 256), "info"));
-            hud.RegisterElement(new HudInfo(spaceship, new Vector2I(256, 256), "dashboard"));
+            hud.RegisterElement(new HudInfo(manager, new Vector2I(256, 256), "dashboard"));
             hud.RegisterElement(new HudHealth(spaceship, new Vector2I(256, 256), "health"));
 
             spaceship.GetComponent<MeshAnimationComponent>().LoadAnimation("openCockpit", "Animations/OpenCockpit.txt");
-            _world.GetSystem<WorldGenerationSystem>().CreateRandomWorld(1);
+
+            manager.CreateWorld(30, 1);
         }
 
         public override void Update(GameTime gameTime)
