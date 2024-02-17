@@ -6,6 +6,7 @@ using Project1.Engine.Systems.RenderMessages;
 using Project2.Engine.Systems.RenderMessages;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -62,6 +63,8 @@ namespace Project2.Engine
         private List<RenderMessage> _renderMessages;
         private Dictionary<string, RenderTarget2D> _renderTargets;
 
+        private TextureCube _skybox;
+
         protected Render(Game game)
         {
             _renderMessages = new List<RenderMessage>();
@@ -101,6 +104,8 @@ namespace Project2.Engine
 
             IsReady = true;
             GraphicsReady?.Invoke();
+
+            LoadSkybox("Textures/Skybox");
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -128,6 +133,7 @@ namespace Project2.Engine
             _graphicsDevice.Clear(Color.CornflowerBlue);
 
             // draw our 3d stuff
+            DrawSkybox(camera);
             ProcessDrawMessages(camera);
             ProcessOtherMessages(camera);
 
@@ -234,6 +240,39 @@ namespace Project2.Engine
             _spriteBatch.Begin();
             _spriteBatch.Draw(_renderTargets[texture], Vector2.Zero, Color.White);
             _spriteBatch.End();
+        }
+        
+        private void LoadSkybox(string path)
+        {
+            if (_skybox != null)
+                _skybox.Dispose();
+
+            LoadAsset<TextureCube>(path);
+            _skybox = Asset<TextureCube>(path);
+
+            Console.WriteLine($"Loading skybox '{path}' -> {_skybox.Size}x{_skybox.Size}");
+        }
+
+        private void DrawSkybox(Camera camera)
+        {
+            if (_skybox == null)
+                return;
+
+            _graphicsDevice.SetRenderTarget(null);
+
+            _graphicsDevice.DepthStencilState = DepthStencilState.DepthRead;
+            _graphicsDevice.SamplerStates[0] = SamplerState.LinearWrap;
+            _graphicsDevice.BlendState = BlendState.Opaque;
+
+            var effect = Asset<Effect>("Shaders/Skybox");
+            Matrix viewNoTranslation = camera.ViewMatrix;
+            viewNoTranslation.Translation = Vector3.Zero;
+
+            effect.Parameters["View"].SetValue(viewNoTranslation);
+            effect.Parameters["Projection"].SetValue(camera.ProjectionMatrix);
+            effect.Parameters["SkyboxTexture"].SetValue(_skybox);
+            effect.CurrentTechnique.Passes[0].Apply();
+            _graphicsDevice.DrawUserIndexedPrimitives(PrimitiveType.TriangleList, _skyboxVerts, 0, 8, _skyboxInd, 0, 12);
         }
 
         private void ProcessDrawMessages(Camera camera)
@@ -433,6 +472,29 @@ namespace Project2.Engine
         };
         private static short[] _quadVertexIndicesNoBack = new short[] { 0, 1, 2, 2, 3, 0 };
         private static short[] _quadVertexIndices = new short[] { 0, 1, 2, 2, 3, 0, 0, 3, 2, 2, 1, 0 };
+
+        VertexPosition[] _skyboxVerts = new VertexPosition[]
+        {
+            new VertexPosition(new Vector3(-1.0f, 1.0f, -1.0f)),  // Vertex 0
+            new VertexPosition(new Vector3(1.0f, 1.0f, -1.0f)),   // Vertex 1
+            new VertexPosition(new Vector3(-1.0f, -1.0f, -1.0f)), // Vertex 2
+            new VertexPosition(new Vector3(1.0f, -1.0f, -1.0f)),  // Vertex 3
+    
+            new VertexPosition(new Vector3(-1.0f, 1.0f, 1.0f)),   // Vertex 4
+            new VertexPosition(new Vector3(1.0f, 1.0f, 1.0f)),    // Vertex 5
+            new VertexPosition(new Vector3(-1.0f, -1.0f, 1.0f)),  // Vertex 6
+            new VertexPosition(new Vector3(1.0f, -1.0f, 1.0f)),   // Vertex 7
+        };
+
+        short[] _skyboxInd = new short[]
+        {
+            0, 1, 2, 2, 1, 3,
+            4, 6, 5, 5, 6, 7,
+            4, 5, 0, 0, 5, 1,
+            2, 3, 6, 6, 3, 7,
+            4, 0, 6, 6, 0, 2,
+            1, 5, 3, 3, 5, 7
+        };
 
         private static VertexPosition[] _boxVertexPosition = new[]
         {

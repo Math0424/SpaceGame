@@ -7,38 +7,51 @@
 	#define PS_SHADERMODEL ps_4_0_level_9_1
 #endif
 
-matrix WorldViewProjection;
+float4x4 View;
+float4x4 Projection;
+
+Texture SkyboxTexture;
+samplerCUBE SkyboxSampler = sampler_state
+{
+	texture = (SkyboxTexture);
+	magfilter = LINEAR;
+	minfilter = LINEAR;
+	mipfilter = LINEAR;
+	AddressU = Mirror;
+	AddressV = Mirror;
+};
 
 struct VertexShaderInput
 {
 	float4 Position : POSITION0;
-	float4 Color : COLOR0;
 };
 
 struct VertexShaderOutput
 {
 	float4 Position : SV_POSITION;
-	float4 Color : COLOR0;
+	float3 ViewDirection : TEXCOORD0;
 };
 
 VertexShaderOutput MainVS(in VertexShaderInput input)
 {
-	VertexShaderOutput output = (VertexShaderOutput)0;
+	VertexShaderOutput output;
 
-	output.Position = mul(input.Position, WorldViewProjection);
-	output.Color = input.Color;
+	float4 viewPosition = mul(input.Position, View);
+	output.Position = mul(viewPosition, Projection);
+
+	output.ViewDirection = normalize(input.Position.xyz);
 
 	return output;
 }
 
 float4 MainPS(VertexShaderOutput input) : COLOR
 {
-	return input.Color;
+	return texCUBE(SkyboxSampler, input.ViewDirection);
 }
 
-technique BasicColorDrawing
+technique SkyboxRendering
 {
-	pass P0
+	pass Pass0
 	{
 		VertexShader = compile VS_SHADERMODEL MainVS();
 		PixelShader = compile PS_SHADERMODEL MainPS();

@@ -37,7 +37,7 @@ namespace Project2.MyGame.GUIElements
         float time = 0;
         public override void Draw(float deltaTime)
         {
-            time += deltaTime / 5`;
+            time += deltaTime / 5;
             float delta = (float)(Math.Sin(time) + 1) / 2;
             _text.Text = $"Rings: {(int)(delta * 10)}/10";
             DrawColoredSprite("Textures/GUI/ColorableSprite", Vector2I.Zero, Bounds * 3, 10, Color.Black);
