@@ -38,6 +38,13 @@
 /processorParam:TextureFormat=Compressed
 /build:Fonts/Debug.spritefont
 
+#begin Fonts/Monospace.spritefont
+/importer:FontDescriptionImporter
+/processor:LocalizedFontProcessor
+/processorParam:PremultiplyAlpha=True
+/processorParam:TextureFormat=Compressed
+/build:Fonts/Monospace.spritefont
+
 #begin Models/arrow.fbx
 /importer:FbxImporter
 /processor:ModelProcessor

@@ -49,6 +49,30 @@ namespace Project1.Engine
             return !_keysLastFrame.Contains(k) && IsKeyUp(k);
         }
 
+        public static bool CapsLock => Keyboard.GetState().CapsLock;
+
+        public static Keys[] NewPressedKeys()
+        {
+            List<Keys> keys = new List<Keys>();
+            foreach (var x in Enum.GetValues<Keys>())
+            {
+                if (IsNewKeyDown(x))
+                    keys.Add(x);
+            }
+            return keys.ToArray();
+        }
+
+        public static Keys[] PressedKeys()
+        {
+            List<Keys> keys = new List<Keys>();
+            foreach(var x in Enum.GetValues<Keys>())
+            {
+                if (IsKeyDown(x))
+                    keys.Add(x);
+            }
+            return keys.ToArray();
+        }
+
         public static bool IsMouseDown(MouseButtons button)
         {
             switch (button)

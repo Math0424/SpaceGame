@@ -9,8 +9,10 @@ namespace Project1.Engine.Systems.RenderMessages
 {
     public enum TextDrawOptions
     {
-        Default,
-        Centered,
+        Left = 0,
+        CenteredH = 1,
+        CenteredV = 2,
+        Centered = CenteredH | CenteredV,
     }
 
     internal class RenderMessageDrawText : RenderMessageSprite
@@ -21,7 +23,7 @@ namespace Project1.Engine.Systems.RenderMessages
         public Vector2 Pos { get; private set; }
         public Color Color { get; private set; }
         public TextDrawOptions DrawOptions { get; private set; }
-        public RenderMessageDrawText(string font, string text, float scale, float depth, Vector2 pos, Color color, TextDrawOptions drawOptions = TextDrawOptions.Default, string RenderTarget = null) : base(depth, RenderTarget, RenderMessageType.DrawText)
+        public RenderMessageDrawText(string font, string text, float scale, float depth, Vector2 pos, Color color, TextDrawOptions drawOptions = TextDrawOptions.Left, string RenderTarget = null) : base(depth, RenderTarget, RenderMessageType.DrawText)
         {
             this.Font = font;
             this.Text = text;

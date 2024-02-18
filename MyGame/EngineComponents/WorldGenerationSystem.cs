@@ -27,30 +27,31 @@ namespace Project1.MyGame
             _world = world;
         }
 
-        public static (byte, float, ushort) DecodeSeed(ulong value)
+        public static (byte, byte, ushort) DecodeSeed(uint value)
         {
-            return ((byte)(value & byte.MaxValue), BitConverter.ToSingle(BitConverter.GetBytes(value), 1), (ushort)((ushort)(value >> (5 * 8)) & ushort.MaxValue));
+            return ((byte)(value & byte.MaxValue), (byte)(value >> (8) & byte.MaxValue), (ushort)((ushort)(value >> (2 * 8)) & ushort.MaxValue));
         }
 
-        public static ulong CreateSeed(byte checkpoints, float distanceScaling, ushort seed)
+        public static uint CreateSeed(byte checkpoints, byte distanceScaling, ushort seed)
         {
-            byte[] ret = new byte[64];
+            byte[] ret = new byte[32];
             BitConverter.GetBytes(checkpoints).CopyTo(ret, 0);
             BitConverter.GetBytes(distanceScaling).CopyTo(ret, sizeof(byte));
-            BitConverter.GetBytes(seed).CopyTo(ret, sizeof(byte) + sizeof(float));
-            return BitConverter.ToUInt64(ret);
+            BitConverter.GetBytes(seed).CopyTo(ret, sizeof(byte) + sizeof(byte));
+            return BitConverter.ToUInt32(ret);
         }
 
-        public void CreateRandomWorld(byte checkpoints, float distanceScaling, ushort seed)
+        public void CreateRandomWorld(byte checkpoints, byte distanceScaling, ushort seed)
         {
             Random r = new Random(seed);
             Vector3[] randomPoints = new Vector3[checkpoints];
 
-            Console.WriteLine($"Creating a world {checkpoints}:{Math.Round(distanceScaling, 2)}:{seed}");
+            float difficulty = distanceScaling / (float)byte.MaxValue;
+            Console.WriteLine($"Creating a world {checkpoints}:{Math.Round(difficulty, 2)}:{seed}");
 
             Vector3 normal = Vector3.Right;
             Vector3 currPos = Vector3.Zero;
-            float distanceBetween = Math.Clamp(50 * distanceScaling, 20, 100);
+            float distanceBetween = Math.Max(100 * difficulty, 20);
             for(int i = 1; i < checkpoints; i++)
             {
                 currPos += normal * distanceBetween;
@@ -58,7 +59,7 @@ namespace Project1.MyGame
                 Vector3 tangent = Vector3.Normalize(Vector3.Cross(normal, Vector3.Up));
                 Vector3 biTangent = Vector3.Normalize(Vector3.Cross(normal, tangent));
 
-                float offset = 50 * distanceScaling;
+                float offset = 100 * difficulty;
                 float randomTangent = (float)r.NextDouble() * offset;
                 float randomBiTangent = (float)r.NextDouble() * offset;
 

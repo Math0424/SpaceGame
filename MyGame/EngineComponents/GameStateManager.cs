@@ -44,7 +44,7 @@ namespace Project2.MyGame.EngineComponents
             Render.EnqueueMessage(new RenderMessageLoadTexture("Textures/GUI/arrow"));
         }
 
-        public void CreateWorld(byte checkpoints, float difficulty)
+        public void CreateWorld(byte checkpoints, byte difficulty)
         {
             Random r = new Random();
             ushort seed = (ushort)r.Next(ushort.MaxValue);

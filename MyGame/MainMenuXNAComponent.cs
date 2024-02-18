@@ -40,28 +40,33 @@ namespace Project1.MyGame
         public override void Initialize()
         {
             var hud = _world.GetSystem<HudSystem>();
-            var manager = _world.GetSystem<GameStateManager>();
+            hud.RegisterElement(new MainMenuGUI(Render.ScreenBounds));
 
-            var spaceship = _world.CreateEntity()
-                .AddComponent(new PositionComponent(Matrix.Identity))//, Matrix.CreateScale(0.01f)))
-                .AddComponent(new PrimitivePhysicsComponent(RigidBodyType.Sphere, 10))
-                .AddComponent(new SpaceshipController(Matrix.CreateTranslation(new Vector3(0, 0.4f, 0.7f))))
-                .AddComponent(new MeshComponent("Models/Cockpit", "Textures/Spaceship/CT", "Textures/Spaceship/ADD"))
-                .AddComponent(new MeshRenderingComponent())
-                .AddComponent(new MeshAnimationComponent());
-
-            hud.RegisterElement(new HudSpeed(spaceship, new Vector2I(256, 256), "info"));
-            hud.RegisterElement(new HudInfo(manager, new Vector2I(256, 256), "dashboard"));
-            hud.RegisterElement(new HudHealth(spaceship, new Vector2I(256, 256), "health"));
-
-            spaceship.GetComponent<MeshAnimationComponent>().LoadAnimation("openCockpit", "Animations/OpenCockpit.txt");
-
-            manager.CreateWorld(11, 1);
+            // var manager = _world.GetSystem<GameStateManager>();
+            // 
+            // var spaceship = _world.CreateEntity()
+            //     .AddComponent(new PositionComponent(Matrix.Identity))//, Matrix.CreateScale(0.01f)))
+            //     .AddComponent(new PrimitivePhysicsComponent(RigidBodyType.Sphere, 10))
+            //     .AddComponent(new SpaceshipController(Matrix.CreateTranslation(new Vector3(0, 0.4f, 0.7f))))
+            //     .AddComponent(new MeshComponent("Models/Cockpit", "Textures/Spaceship/CT", "Textures/Spaceship/ADD"))
+            //     .AddComponent(new MeshRenderingComponent())
+            //     .AddComponent(new MeshAnimationComponent());
+            // 
+            // hud.RegisterElement(new HudSpeed(spaceship, new Vector2I(256, 256), "info"));
+            // hud.RegisterElement(new HudInfo(manager, new Vector2I(256, 256), "dashboard"));
+            // hud.RegisterElement(new HudHealth(spaceship, new Vector2I(256, 256), "health"));
+            // 
+            // spaceship.GetComponent<MeshAnimationComponent>().LoadAnimation("openCockpit", "Animations/OpenCockpit.txt");
+            // 
+            // manager.CreateWorld(11, 1);
         }
 
         public override void Update(GameTime gameTime)
         {
-
+            var camera = _world.GetSystem<Camera>();
+            float val = (float)gameTime.TotalGameTime.TotalSeconds / 100;
+            Matrix rot = Matrix.CreateFromYawPitchRoll(0.001f, (float)Math.Sin(val) / 250, 0);
+            camera.SetWorldMatrix(Matrix.Multiply(camera.WorldMatrix, rot));
         }
 
         public int DrawOrder => 0;

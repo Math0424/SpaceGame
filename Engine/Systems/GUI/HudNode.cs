@@ -12,15 +12,15 @@ namespace Project1.Engine.Systems.GUI
 {
     internal abstract partial class HudNode
     {
-        public virtual bool Visible { get; set; }
-        public virtual HudNode Parent
+        public bool Visible { get; set; }
+        public HudNode Parent
         {
             get => _parent;
             set => _parent = value;
         }
 
         public ref Vector2I PositionRef { get => ref _position; }
-        public Vector2I Position { 
+        public virtual Vector2I Position { 
             get => _position; 
             set => _position = value; 
         }
@@ -29,7 +29,7 @@ namespace Project1.Engine.Systems.GUI
         public bool ShareCursor { get; set; }
 
         public int Padding;
-        public Vector2I Bounds
+        public virtual Vector2I Bounds
         {
             get { return _bounds; }
             set
@@ -73,6 +73,7 @@ namespace Project1.Engine.Systems.GUI
 
         public HudNode(Vector2I bounds, string renderTarget)
         {
+            Visible = true;
             _children = new List<HudNode>();
             Bounds = bounds;
             Position = bounds / 2;
@@ -81,6 +82,7 @@ namespace Project1.Engine.Systems.GUI
 
         public HudNode(HudNode parent)
         {
+            Visible = true;
             _children = new List<HudNode>();
             Parent = parent;
             
@@ -160,7 +162,7 @@ namespace Project1.Engine.Systems.GUI
                 return;
 
             Vector2I newPos = Position;
-            if (_parentAlignments.HasFlag(ParentAlignments.Center))
+            if ((_parentAlignments & ParentAlignments.Center) == ParentAlignments.Center)
             {
                 Position = Parent.PositionRef;
                 return;
@@ -168,26 +170,25 @@ namespace Project1.Engine.Systems.GUI
 
             int innerV = (_parentAlignments & ParentAlignments.InnerV) == ParentAlignments.InnerV ? -1 : 1;
             int innerH = (_parentAlignments & ParentAlignments.InnerH) == ParentAlignments.InnerH ? -1 : 1;
-            int padding = _parentAlignments.HasFlag(ParentAlignments.Padding) ? Padding : 0;
 
             if (_parentAlignments.HasFlag(ParentAlignments.Top))
             {
-                newPos.Y = Parent.PositionRef.Y - (Parent.Bounds.Y / 2) - padding * innerH;
+                newPos.Y = Parent.PositionRef.Y - (Parent.Bounds.Y / 2) - Padding * innerH;
                 newPos.Y -= (Bounds.Y / 2) * innerH;
             }
             if (_parentAlignments.HasFlag(ParentAlignments.Bottom))
             {
-                newPos.Y = Parent.PositionRef.Y + (Parent.Bounds.Y / 2) + padding * innerH;
+                newPos.Y = Parent.PositionRef.Y + (Parent.Bounds.Y / 2) + Padding * innerH;
                 newPos.Y += (Bounds.Y / 2) * innerH;
             }
             if (_parentAlignments.HasFlag(ParentAlignments.Left))
             {
-                newPos.X = Parent.PositionRef.X - (Parent.Bounds.X / 2) - padding * innerV;
+                newPos.X = Parent.PositionRef.X - (Parent.Bounds.X / 2) - Padding * innerV;
                 newPos.X -= (Bounds.X / 2) * innerV;
             }
             if (_parentAlignments.HasFlag(ParentAlignments.Right))
             {
-                newPos.X = Parent.PositionRef.X + (Parent.Bounds.X / 2) + padding * innerV;
+                newPos.X = Parent.PositionRef.X + (Parent.Bounds.X / 2) + Padding * innerV;
                 newPos.X += (Bounds.X / 2) * innerV;
             }
             Position = newPos;
@@ -198,21 +199,21 @@ namespace Project1.Engine.Systems.GUI
         public abstract void Draw(float deltaTime);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void DrawSprite(string sprite, Vector2I pos, Vector2I bounds, float depth)
+        protected void DrawSprite(string sprite, Vector2I pos, Vector2I bounds, float depth)
         {
             Rectangle rec = new Rectangle(pos.X - bounds.X / 2, pos.Y - bounds.Y / 2, bounds.X, bounds.Y);
             Render.EnqueueMessage(new RenderMessageDrawSprite(sprite, rec, depth, RenderTarget: _renderTarget));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void DrawColoredSprite(string sprite, Vector2I pos, Vector2I bounds, float depth, Color color)
+        protected void DrawColoredSprite(string sprite, Vector2I pos, Vector2I bounds, float depth, Color color)
         {
             Rectangle rec = new Rectangle(pos.X - bounds.X / 2, pos.Y - bounds.Y / 2, bounds.X, bounds.Y);
             Render.EnqueueMessage(new RenderMessageDrawColoredSprite(sprite, rec, depth, color, RenderTarget: _renderTarget));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void DrawText(string font, string text, float scale, float depth, Vector2I pos, Color color, TextDrawOptions options = TextDrawOptions.Default)
+        protected void DrawText(string font, string text, float scale, float depth, Vector2I pos, Color color, TextDrawOptions options = TextDrawOptions.Left)
         {
             Render.EnqueueMessage(new RenderMessageDrawText(font, text, scale, depth, pos, color, options, RenderTarget: _renderTarget));
         }

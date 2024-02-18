@@ -29,7 +29,7 @@ namespace Project2.MyGame.GUIElements
                 Text = "SpaceShip",
                 TextScale = 2,
                 TextColor = Color.Orange,
-                TextOptions = TextDrawOptions.Centered,
+                TextAlignment = TextDrawOptions.Centered,
                 zOffset = 9,
             };
         }

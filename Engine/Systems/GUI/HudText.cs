@@ -14,20 +14,22 @@ namespace Project1.Engine.Systems.GUI
         public string Text;
         public float TextScale;
         public Vector2I TextOffset;
-        public TextDrawOptions TextOptions;
+        public TextDrawOptions TextAlignment;
+        public string TextFont;
 
         public HudText(HudNode parent) : base(parent)
         {
+            TextFont = "Fonts/Debug";
             TextColor = Color.Black;
             TextScale = 1;
             Text = "HudText";
-            TextOptions = TextDrawOptions.Centered;
+            TextAlignment = TextDrawOptions.Centered;
         }
 
         public override void Draw(float deltaTime)
         {
             if (Text != null)
-                DrawText("Fonts/Debug", Text, TextScale, zOffset, Position - TextOffset, TextColor, TextOptions);
+                DrawText(TextFont, Text, TextScale, zOffset, Position - TextOffset, TextColor, TextAlignment);
         }
 
         public override void HandleInput(ref HudInput input)

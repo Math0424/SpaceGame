@@ -21,7 +21,6 @@ namespace Project1.Engine.Systems.GUI
         Inner = InnerV | InnerH,
 
         Outer = 1 << 7,
-        Padding = 1 << 6,
     }
 
     internal enum SizeAlignments

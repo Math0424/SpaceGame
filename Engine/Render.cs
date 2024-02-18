@@ -93,6 +93,7 @@ namespace Project2.Engine
             _spriteEffect = new SpriteEffect(_graphicsDevice);
 
             EnqueueMessage(new RenderMessageLoadFont("Fonts/Debug"));
+            EnqueueMessage(new RenderMessageLoadFont("Fonts/Monospace"));
             EnqueueMessage(new RenderMessageLoadMesh("Models/DebugSphere"));
             EnqueueMessage(new RenderMessageLoadEffect("Shaders/WorldShader"));
             EnqueueMessage(new RenderMessageLoadEffect("Shaders/Skybox"));
@@ -449,13 +450,11 @@ namespace Project2.Engine
                         case RenderMessageType.DrawText:
                             var drawText = (RenderMessageDrawText)sprite;
                             SpriteFont font = Asset<SpriteFont>(drawText.Font);
-                            if (drawText.DrawOptions == TextDrawOptions.Centered)
-                            {
-                                Vector2 width = font.MeasureString(drawText.Text);
-                                _spriteBatch.DrawString(font, drawText.Text, drawText.Pos, drawText.Color, 0, width / 2, drawText.Scale, SpriteEffects.None, 0);
-                            }
-                            else
-                                _spriteBatch.DrawString(font, drawText.Text, drawText.Pos, drawText.Color, 0, Vector2.Zero, drawText.Scale, SpriteEffects.None, 0);
+
+                            Vector2 width = font.MeasureString(drawText.Text);
+                            width.X = drawText.DrawOptions.HasFlag(TextDrawOptions.CenteredV) ? width.X : 0;
+                            width.Y = drawText.DrawOptions.HasFlag(TextDrawOptions.CenteredH) ? width.Y : 0;
+                            _spriteBatch.DrawString(font, drawText.Text, drawText.Pos, drawText.Color, 0, width / 2, drawText.Scale, SpriteEffects.None, 0);
                             break;
                     }
                 }

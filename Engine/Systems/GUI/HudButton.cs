@@ -13,12 +13,12 @@ namespace Project1.Engine.Systems.GUI
         public Color PressedColor;
         public Color Color;
 
+        public bool IsPressed { get; protected set; }
         public Action<object> OnHovered;
         public Action<object> OnRightClicked;
         public Action<object> OnLeftClicked;
 
         protected bool _isHovered;
-        protected bool _isPressed;
         private bool _wasWithinBounds;
 
         public HudButton(HudNode parent) : base(parent) 
@@ -40,33 +40,35 @@ namespace Project1.Engine.Systems.GUI
 
                 _isHovered = true;
                 if (Input.IsNewMouseDown(Input.MouseButtons.LeftButton) || Input.IsNewMouseDown(Input.MouseButtons.RightButton))
-                    _isPressed = true;
+                {
+                    IsPressed = true;
+                }
 
-                if (_isPressed)
+                if (IsPressed)
                 {
                     if (Input.IsNewMouseUp(Input.MouseButtons.LeftButton))
                     {
                         OnLeftClicked?.Invoke(this);
-                        _isPressed = false;
+                        IsPressed = false;
                     }
                     else if(Input.IsNewMouseUp(Input.MouseButtons.RightButton))
                     {
                         OnRightClicked?.Invoke(this);
-                        _isPressed = false;
+                        IsPressed = false;
                     }
                 }
             }
             else
             {
                 _isHovered = false;
-                _isPressed = false;
+                IsPressed = false;
                 _wasWithinBounds = false;
             }
         }
 
         public override void Draw(float deltaTime)
         {
-            if (_isPressed)
+            if (IsPressed)
                 DrawColoredSprite("Textures/GUI/ColorableSprite", Position, Bounds, zOffset, PressedColor);
             else if(_isHovered)
                 DrawColoredSprite("Textures/GUI/ColorableSprite", Position, Bounds, zOffset, HoverColor);

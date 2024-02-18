@@ -26,7 +26,7 @@ namespace Project1.Engine
             DrawLine(matrix.Translation, Vector3.Normalize(matrix.Forward), Color.Blue);
         }
 
-        public static void DrawWorldText(Camera camera, string text, Vector3 worldPos, Color color, TextDrawOptions options = TextDrawOptions.Default)
+        public static void DrawWorldText(Camera camera, string text, Vector3 worldPos, Color color, TextDrawOptions options = TextDrawOptions.Left)
         {
             if (Vector3.Dot(camera.Forward, camera.Translation - worldPos) > .5f)
                 return;

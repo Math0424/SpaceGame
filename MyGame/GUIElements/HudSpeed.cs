@@ -29,7 +29,7 @@ namespace Project2.MyGame.GUIElements
                 Text = "SpaceShip",
                 TextScale = 3,
                 TextColor = Color.White,
-                TextOptions = TextDrawOptions.Default,
+                TextAlignment = TextDrawOptions.Left,
             };
             _text.Position += new Vector2I(-90, -50);
         }

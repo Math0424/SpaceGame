@@ -28,7 +28,7 @@ namespace Project2.MyGame.GUIElements
                 Text = "SpaceShip",
                 TextScale = 2,
                 TextColor = Color.White,
-                TextOptions = TextDrawOptions.Centered,
+                TextAlignment = TextDrawOptions.Centered,
             };
             _text.Position += new Vector2I(0, 22);
             _points = new HudText(this)
@@ -36,7 +36,7 @@ namespace Project2.MyGame.GUIElements
                 Text = "SpaceShip",
                 TextScale = 1,
                 TextColor = Color.White,
-                TextOptions = TextDrawOptions.Centered,
+                TextAlignment = TextDrawOptions.Centered,
             };
             _points.Position += new Vector2I(0, -5);
 
@@ -45,7 +45,7 @@ namespace Project2.MyGame.GUIElements
                 Text = "0:00:000",
                 TextScale = .75f,
                 TextColor = Color.White,
-                TextOptions = TextDrawOptions.Centered,
+                TextAlignment = TextDrawOptions.Centered,
             };
             _time.Position += new Vector2I(0, -32);
         }
