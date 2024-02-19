@@ -177,8 +177,8 @@ namespace Project2.MyGame.GUIElements
                     uint val = Convert.ToUInt32(_levelEnter.Text.ToLower(), 16);
                     _levelEnter.EmptyText = "Applied code";
                     var x = WorldGenerationSystem.DecodeSeed(val);
-                    SetData(x.Item1, x.Item1, x.Item3);
-                } 
+                    SetData(x.Item1, x.Item2, x.Item3);
+                }
                 catch
                 {
                     _levelEnter.EmptyText = "Invalid code";
@@ -191,7 +191,7 @@ namespace Project2.MyGame.GUIElements
 
         private void SetData(byte checkpoints, byte difficulty, ushort seed)
         {
-            _sliderCheckpoints.ScrollbarPosition = checkpoints / (float)byte.MaxValue;
+            _sliderCheckpoints.ScrollbarPosition = checkpoints / MAX_CHECKPOINTS;
             _sliderDifficulty.ScrollbarPosition = difficulty / (float)byte.MaxValue;
             _sliderSeed.ScrollbarPosition = seed / (float)ushort.MaxValue;
         }

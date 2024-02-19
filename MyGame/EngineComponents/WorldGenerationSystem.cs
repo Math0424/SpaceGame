@@ -32,11 +32,11 @@ namespace Project1.MyGame
             return ((byte)(value & byte.MaxValue), (byte)(value >> (8) & byte.MaxValue), (ushort)((ushort)(value >> (2 * 8)) & ushort.MaxValue));
         }
 
-        public static uint CreateSeed(byte checkpoints, byte distanceScaling, ushort seed)
+        public static uint CreateSeed(byte checkpoints, byte difficulty, ushort seed)
         {
             byte[] ret = new byte[32];
             BitConverter.GetBytes(checkpoints).CopyTo(ret, 0);
-            BitConverter.GetBytes(distanceScaling).CopyTo(ret, sizeof(byte));
+            BitConverter.GetBytes(difficulty).CopyTo(ret, sizeof(byte));
             BitConverter.GetBytes(seed).CopyTo(ret, sizeof(byte) + sizeof(byte));
             return BitConverter.ToUInt32(ret);
         }

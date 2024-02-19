@@ -26,17 +26,17 @@ namespace Project1
             Render.Initalize(this);
             LoadMainMenu();
 
-            Random r = new Random();
-            for(int i = 0; i < 100; i++)
-            {
-                byte a = (byte)(r.NextDouble() * byte.MaxValue);
-                byte b = (byte)(r.NextDouble() * byte.MaxValue);
-                ushort c = (ushort)(r.NextDouble() * ushort.MaxValue);
-                uint seed = WorldGenerationSystem.CreateSeed(a, b, c);
-                var x = WorldGenerationSystem.DecodeSeed(seed);
-                if (a != x.Item1 || b != x.Item2 || c != x.Item3)
-                    Console.WriteLine($"Error input {a}:{b}:{c} -> {x.Item1}:{x.Item2}:{x.Item3}");
-            }
+            // Random r = new Random();
+            // for(int i = 0; i < 100; i++)
+            // {
+            //     byte a = (byte)(r.NextDouble() * byte.MaxValue);
+            //     byte b = (byte)(r.NextDouble() * byte.MaxValue);
+            //     ushort c = (ushort)(r.NextDouble() * ushort.MaxValue);
+            //     uint seed = WorldGenerationSystem.CreateSeed(a, b, c);
+            //     var x = WorldGenerationSystem.DecodeSeed(seed);
+            //     if (a != x.Item1 || b != x.Item2 || c != x.Item3)
+            //         Console.WriteLine($"Error input {a}:{b}:{c} -> {x.Item1}:{x.Item2}:{x.Item3}");
+            // }
 
         }
 
