@@ -22,6 +22,8 @@ namespace Project2.MyGame
         {
             string path = Assembly.GetExecutingAssembly().Location;
             path = Path.Combine(Path.GetDirectoryName(path), "saves");
+            if (!File.Exists(path))
+                File.Create(path);
             using FileStream fs = File.Open(path, FileMode.Append);
 
             int size = Marshal.SizeOf<Save>();
@@ -34,7 +36,7 @@ namespace Project2.MyGame
             fs.Write(buffer);
             fs.Flush();
         }
-
+        
         public unsafe static Save[] GetSaves()
         {
             string path = Assembly.GetExecutingAssembly().Location;
@@ -46,7 +48,7 @@ namespace Project2.MyGame
             byte[] buffer = new byte[stride];
 
             List<Save> saves = new List<Save>();
-            while (fs.Position < fs.Length - stride)
+            while (fs.Position < fs.Length)
             {
                 fs.Read(buffer, 0, stride);
                 IntPtr ptr = Marshal.AllocHGlobal(stride);
