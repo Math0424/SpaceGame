@@ -72,6 +72,7 @@ namespace Project2.Engine
             _game = game;
 
             _graphics = new GraphicsDeviceManager(game);
+            _graphics.GraphicsProfile = GraphicsProfile.HiDef;
             _graphics.DeviceCreated += GraphicInit;
 
             var monitor = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode;
@@ -83,10 +84,10 @@ namespace Project2.Engine
 
         private void GraphicInit(object sender, EventArgs e)
         {
-            Console.WriteLine($"Graphics Init");
 
             _graphics = (GraphicsDeviceManager)sender;
             _graphicsDevice = _graphics.GraphicsDevice;
+            Console.WriteLine($"Graphics Init - {_graphicsDevice.Adapter.Description}");
 
             _basicEffect = new BasicEffect(_graphicsDevice);
             _spriteBatch = new SpriteBatch(_graphicsDevice);
@@ -115,7 +116,7 @@ namespace Project2.Engine
             Instance._renderMessages.Add(message);
         }
         
-        public void DrawScene(Camera camera, RenderTarget2D target)
+        public void DrawScene(Camera camera)
         {
             if (!IsReady)
                 return;
@@ -130,10 +131,9 @@ namespace Project2.Engine
             // draw sprites to the render targets
             ProcessSpriteMessages();
 
-            _graphicsDevice.SetRenderTarget(target);
-            _graphicsDevice.Clear(Color.CornflowerBlue);
-
             // draw our 3d stuff
+            _graphicsDevice.SetRenderTarget(null);
+            //_graphicsDevice.Clear(Color.Transparent);
             DrawSkybox(camera);
             ProcessDrawMessages(camera);
             ProcessOtherMessages(camera);
@@ -258,8 +258,6 @@ namespace Project2.Engine
             if (_skybox == null)
                 return;
 
-            _graphicsDevice.SetRenderTarget(null);
-
             _graphicsDevice.DepthStencilState = DepthStencilState.DepthRead;
             _graphicsDevice.SamplerStates[0] = SamplerState.LinearWrap;
             _graphicsDevice.BlendState = BlendState.Opaque;
@@ -277,8 +275,6 @@ namespace Project2.Engine
 
         private void ProcessDrawMessages(Camera camera)
         {
-            _graphicsDevice.SetRenderTarget(null);
-
             _graphicsDevice.DepthStencilState = DepthStencilState.Default;
             _graphicsDevice.SamplerStates[0] = SamplerState.LinearWrap;
             _graphicsDevice.BlendState = BlendState.AlphaBlend;
@@ -294,26 +290,26 @@ namespace Project2.Engine
                     case RenderMessageType.DrawMesh:
                         var drawEffectMesh = (RenderMessageDrawMesh)message;
                         var effect = Asset<Effect>("Shaders/WorldShader");
-                        effect.Parameters["ViewDir"].SetValue(camera.WorldMatrix.Forward);
+
+                        effect.Parameters["CameraPos"].SetValue(camera.WorldMatrix.Translation);
                         effect.Parameters["ViewProjection"].SetValue(cameraViewMatrix * camera.ProjectionMatrix);
-
-                        effect.Parameters["DiffuseDirection"].SetValue(Vector3.Down);
+                         
+                        effect.Parameters["DiffuseDirection"].SetValue(Vector3.Up);
                         effect.Parameters["DiffuseColor"].SetValue(new Vector3(255 / 255f, 247 / 255f, 250 / 255f));
-                        effect.Parameters["DiffuseIntensity"].SetValue(0.8f);
-
+                        effect.Parameters["DiffuseIntensity"].SetValue(1f);
+                        
                         effect.Parameters["AmbientColor"].SetValue(new Vector3(1, 1, 1));
-                        effect.Parameters["AmbientIntensity"].SetValue(0.5f);
-
+                        effect.Parameters["AmbientIntensity"].SetValue(0.25f);
+                        
                         effect.Parameters["Transparency"].SetValue(drawEffectMesh.Transparency);
                         effect.Parameters["Color"].SetValue(drawEffectMesh.Color.ToVector3());
-
+                    
                         if (drawEffectMesh.Model.Texture_CT != null)
                             effect.Parameters["Texture_CT"].SetValue(Asset<Texture2D>(drawEffectMesh.Model.Texture_CT));
-
+                    
                         if (drawEffectMesh.Model.Texture_ADD == null)
                             effect.Parameters["Texture_ADD"].SetValue(Asset<Texture2D>("Textures/no_ADD"));
-
-                        effect.CurrentTechnique = effect.Techniques[1];
+                    
                         var model = drawEffectMesh.Model.Model;
                         foreach (ModelMesh mesh in model.Meshes)
                         {
@@ -327,7 +323,7 @@ namespace Project2.Engine
                             {
                                 effect.Parameters["Texture_ADD"].SetValue(Asset<Texture2D>(drawEffectMesh.Model.Texture_ADD));
                             }
-
+                    
                             for (int i = 0; i < mesh.MeshParts.Count; i++)
                             {
                                 ModelMeshPart modelMeshPart = mesh.MeshParts[i];
@@ -335,13 +331,13 @@ namespace Project2.Engine
                                 {
                                     _graphicsDevice.SetVertexBuffer(modelMeshPart.VertexBuffer);
                                     _graphicsDevice.Indices = modelMeshPart.IndexBuffer;
-
+                    
                                     Matrix modelMat = mesh.ParentBone.Transform * drawEffectMesh.Matrix;
                                     modelMat.Translation -= camera.WorldMatrix.Translation;
-
+                    
                                     effect.Parameters["WorldInverseTranspose"].SetValue(Matrix.Transpose(Matrix.Invert(modelMat)));
                                     effect.Parameters["World"].SetValue(modelMat);
-
+                    
                                     for (int j = 0; j < effect.CurrentTechnique.Passes.Count; j++)
                                     {
                                         effect.CurrentTechnique.Passes[j].Apply();
@@ -360,11 +356,12 @@ namespace Project2.Engine
                         quadMat.Translation -= camera.WorldMatrix.Translation;
                         _basicEffect.World = quadMat;
                         _basicEffect.CurrentTechnique.Passes[0].Apply();
+                        _basicEffect.View = cameraViewMatrix;
+                        _basicEffect.Projection = camera.ProjectionMatrix;
                         if (drawQuad.DrawBack)
                             _graphicsDevice.DrawUserIndexedPrimitives(PrimitiveType.TriangleList, _quadVertexPositionTexture, 0, 4, _quadVertexIndices, 0, 4);
                         else
                             _graphicsDevice.DrawUserIndexedPrimitives(PrimitiveType.TriangleList, _quadVertexPositionTexture, 0, 4, _quadVertexIndicesNoBack, 0, 2);
-                        _basicEffect.View = cameraViewMatrix;
                         break;
                 }
             }
@@ -430,6 +427,8 @@ namespace Project2.Engine
 
             foreach (var texture in depthSpriteBatch.Keys)
             {
+                if (!_renderTargets.ContainsKey(texture))
+                    continue;
                 RenderMessage[] messages = depthSpriteBatch[texture];
                 _graphicsDevice.SetRenderTarget(_renderTargets[texture]);
                 _graphicsDevice.Clear(Color.Transparent);

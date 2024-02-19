@@ -127,7 +127,7 @@ namespace Project2.MyGame.GUIElements
                 ParentAlignment = ParentAlignments.Bottom | ParentAlignments.Left | ParentAlignments.Inner,
             };
             _btnEasy.Position += new Vector2I(0, -280);
-            _btnEasy.OnLeftClicked += (e) => { SetDifficulty(20, 5); };
+            _btnEasy.OnLeftClicked += (e) => { SetDifficulty(15, 5); };
 
             _btnNormal = new HudTextButton(_btnEasy)
             {
@@ -136,7 +136,7 @@ namespace Project2.MyGame.GUIElements
                 Bounds = new Vector2I(70, 60),
                 ParentAlignment = ParentAlignments.Right,
             };
-            _btnNormal.OnLeftClicked += (e) => { SetDifficulty(50, 128); };
+            _btnNormal.OnLeftClicked += (e) => { SetDifficulty(30, 128); };
 
             _btnHard = new HudTextButton(_btnNormal)
             {
@@ -145,7 +145,7 @@ namespace Project2.MyGame.GUIElements
                 Padding = 5,
                 ParentAlignment = ParentAlignments.Right,
             };
-            _btnHard.OnLeftClicked += (e) => { SetDifficulty(70, 1); };
+            _btnHard.OnLeftClicked += (e) => { SetDifficulty(60, 255); };
 
             _levelEnter = new HudTextInput(this)
             {
@@ -186,7 +186,7 @@ namespace Project2.MyGame.GUIElements
                 _levelEnter.Text = "";
             };
 
-            SetDifficulty(50, 128);
+            SetDifficulty(30, 128);
         }
 
         private void SetData(byte checkpoints, byte difficulty, ushort seed)

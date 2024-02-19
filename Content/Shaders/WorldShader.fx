@@ -11,7 +11,7 @@
 float4x4 World;
 float4x4 ViewProjection;
 float3x3 WorldInverseTranspose;
-float3 ViewDir;
+float3 CameraPos;
 
 float3 Color;
 
@@ -85,7 +85,7 @@ VertexShaderOutput MainVS(in VertexShaderInput input)
 	float4 worldPos = mul(input.Position, World);
 	output.Position = mul(worldPos, ViewProjection);
 
-	output.ViewDir = normalize(ViewDir - mul(input.Position, World));
+	output.ViewDir = normalize(CameraPos - worldPos);
 	return output;
 }
 
@@ -99,24 +99,14 @@ float4 MainPS(VertexShaderOutput input) : COLOR0
 	float3 diffuse = DiffuseColor * intensity * DiffuseIntensity;
 
 	float3 reflection = normalize(reflect(-DiffuseDirection, input.Normal));
-	float specularIntensity = pow(saturate(dot(reflection, input.ViewDir)), ADDTexture.g);
-	float3 specular = specularIntensity * (1 - ADDTexture.g) * ADDTexture.b;
+	float specularIntensity = pow(saturate(dot(reflection, input.ViewDir)), (1 + ADDTexture.g) * 5);
+	float specular = specularIntensity * (1 - ADDTexture.g) * ADDTexture.b;
 
 	float3 finalColorRGB = (ambient + diffuse + specular) * (ADDTexture.a * CTTexture.rgb + (1 - ADDTexture.a) * Color) * ADDTexture.r;
-
 	return float4(finalColorRGB, CTTexture.a * Transparency);
 }
 
 technique Default
-{
-	pass Pass0
-	{
-		VertexShader = compile VS_SHADERMODEL MainVS();
-		PixelShader = compile PS_SHADERMODEL MainPS();
-	}
-};
-
-technique Transparent
 {
 	pass Pass0
 	{

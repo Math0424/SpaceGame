@@ -59,7 +59,7 @@ namespace Project1.Engine.Systems
                 }
             }
 
-            Render.Instance.DrawScene(Camera, null);
+            Render.Instance.DrawScene(Camera);
 
             if (_debugMode)
             {
