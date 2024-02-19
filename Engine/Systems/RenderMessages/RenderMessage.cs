@@ -35,6 +35,8 @@ namespace Project1.Engine.Systems.RenderMessages
 
         CreateRT = 1 << 16 | Load,
         DisposeRT = 1 << 17 | Load,
+
+        DrawParticle = 1 << 18,
     }
 
     internal abstract class RenderMessage

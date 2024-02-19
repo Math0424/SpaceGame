@@ -84,7 +84,6 @@ namespace Project2.Engine
 
         private void GraphicInit(object sender, EventArgs e)
         {
-
             _graphics = (GraphicsDeviceManager)sender;
             _graphicsDevice = _graphics.GraphicsDevice;
             Console.WriteLine($"Graphics Init - {_graphicsDevice.Adapter.Description}");
@@ -133,7 +132,6 @@ namespace Project2.Engine
 
             // draw our 3d stuff
             _graphicsDevice.SetRenderTarget(null);
-            //_graphicsDevice.Clear(Color.Transparent);
             DrawSkybox(camera);
             ProcessDrawMessages(camera);
             ProcessOtherMessages(camera);
@@ -355,9 +353,9 @@ namespace Project2.Engine
                         Matrix quadMat = drawQuad.Matrix;
                         quadMat.Translation -= camera.WorldMatrix.Translation;
                         _basicEffect.World = quadMat;
-                        _basicEffect.CurrentTechnique.Passes[0].Apply();
                         _basicEffect.View = cameraViewMatrix;
                         _basicEffect.Projection = camera.ProjectionMatrix;
+                        _basicEffect.CurrentTechnique.Passes[0].Apply();
                         if (drawQuad.DrawBack)
                             _graphicsDevice.DrawUserIndexedPrimitives(PrimitiveType.TriangleList, _quadVertexPositionTexture, 0, 4, _quadVertexIndices, 0, 4);
                         else
@@ -374,7 +372,6 @@ namespace Project2.Engine
             _basicEffect.Projection = camera.ProjectionMatrix;
             _basicEffect.TextureEnabled = true;
             _basicEffect.VertexColorEnabled = false;
-            _basicEffect.CurrentTechnique.Passes[0].Apply();
 
             foreach (var message in _otherMessages)
             {
