@@ -54,7 +54,7 @@ namespace Project2.MyGame.GUIElements
         {
             TimeSpan timeSpan = TimeSpan.FromSeconds(_manager.ElapsedTime);
             _time.Text = $"{(int)timeSpan.TotalMinutes}:{timeSpan.Seconds:D2}:{timeSpan.Milliseconds:D3}";
-            _text.Text = $"Rings: {_manager.CompletedRings}/{_manager.TotalRings}";
+            _text.Text = $"Rings: {_manager.CompletedRings}/{_manager.TotalRings + 1}";
             _points.Text = _manager.Points.ToString();
             DrawColoredSprite("Textures/GUI/ColorableSprite", Vector2I.Zero, Bounds * 3, 10, Color.Black);
         }

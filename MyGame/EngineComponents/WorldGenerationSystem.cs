@@ -44,7 +44,7 @@ namespace Project1.MyGame
         public void CreateRandomWorld(byte checkpoints, byte distanceScaling, ushort seed)
         {
             Random r = new Random(seed);
-            Vector3[] randomPoints = new Vector3[checkpoints];
+            Vector3[] randomPoints = new Vector3[checkpoints + 1];
 
             float difficulty = distanceScaling / (float)byte.MaxValue;
             Console.WriteLine($"Creating a world {checkpoints}:{Math.Round(difficulty, 2)}:{seed}");
@@ -52,7 +52,7 @@ namespace Project1.MyGame
             Vector3 normal = Vector3.Right;
             Vector3 currPos = Vector3.Zero;
             float distanceBetween = Math.Max(100 * difficulty, 20);
-            for(int i = 1; i < checkpoints; i++)
+            for(int i = 1; i < checkpoints + 1; i++)
             {
                 currPos += normal * distanceBetween;
 

@@ -2,6 +2,7 @@
 using Project1.Engine;
 using Project1.Engine.Systems.GUI;
 using Project1.Engine.Systems.RenderMessages;
+using Project1.MyGame;
 using Project2.Engine.Systems.GUI;
 using System;
 using System.Collections.Generic;
@@ -13,11 +14,14 @@ namespace Project2.MyGame.GUIElements
 {
     internal class MainMenuGUI : HudNode
     {
-        private HudButton _startGame, _btnEasy, _btnNormal, _btnHard;
+        private HudButton _startGame, _btnEasy, _btnNormal, _btnHard, _btnLevelGo;
         private HudSlider _sliderCheckpoints, _sliderDifficulty, _sliderSeed;
         private HudText _checkPointsText, _difficultyText, _seedText;
 
         private HudText _saves;
+        private HudTextInput _levelEnter;
+
+        public Action<byte, byte, ushort> StartGame;
 
         private const float MAX_CHECKPOINTS = 100;
 
@@ -29,6 +33,15 @@ namespace Project2.MyGame.GUIElements
                 Padding = 40,
                 Text = "Start Game",
                 ParentAlignment = ParentAlignments.Left | ParentAlignments.Bottom | ParentAlignments.Inner,
+            };
+            _startGame.OnLeftClicked += (e) =>
+            {
+                byte checkpoints = (byte)(_sliderCheckpoints.ScrollbarPosition * MAX_CHECKPOINTS);
+                checkpoints = Math.Max((byte)2, checkpoints);
+                byte difficutly = (byte)(_sliderDifficulty.ScrollbarPosition * byte.MaxValue);
+                difficutly = Math.Max((byte)1, difficutly);
+                ushort seed = (ushort)(_sliderSeed.ScrollbarPosition * ushort.MaxValue);
+                StartGame?.Invoke(checkpoints, difficutly, seed);
             };
 
             new HudText(this)
@@ -61,8 +74,8 @@ namespace Project2.MyGame.GUIElements
             //     });
             // }
 
-            foreach (var x in GameSaverLoader.GetSaves())
-                _saves.Text += $"\n{TimeSpan.FromTicks(x.Time).ToString("mm\\:ss\\:fff"), -10} | {x.Points, 11} | {x.LevelData}";
+            foreach (var x in GameSaverLoader.GetSaves().Reverse())
+                _saves.Text += $"\n{TimeSpan.FromTicks(x.Time).ToString("mm\\:ss\\:fff"), -10} | {x.Points, 11} | {Convert.ToString(x.LevelData, 16)}";
 
             _sliderSeed = new HudSlider(_startGame)
             {
@@ -114,7 +127,7 @@ namespace Project2.MyGame.GUIElements
                 ParentAlignment = ParentAlignments.Bottom | ParentAlignments.Left | ParentAlignments.Inner,
             };
             _btnEasy.Position += new Vector2I(0, -280);
-            _btnEasy.OnLeftClicked += (e) => { SetDifficulty(20, 0.1f); };
+            _btnEasy.OnLeftClicked += (e) => { SetDifficulty(20, 5); };
 
             _btnNormal = new HudTextButton(_btnEasy)
             {
@@ -123,7 +136,7 @@ namespace Project2.MyGame.GUIElements
                 Bounds = new Vector2I(70, 60),
                 ParentAlignment = ParentAlignments.Right,
             };
-            _btnNormal.OnLeftClicked += (e) => { SetDifficulty(50, 0.5f); };
+            _btnNormal.OnLeftClicked += (e) => { SetDifficulty(50, 128); };
 
             _btnHard = new HudTextButton(_btnNormal)
             {
@@ -134,13 +147,60 @@ namespace Project2.MyGame.GUIElements
             };
             _btnHard.OnLeftClicked += (e) => { SetDifficulty(70, 1); };
 
+            _levelEnter = new HudTextInput(this)
+            {
+                EmptyText = "Level Code",
+                Padding = 40,
+                ParentAlignment = ParentAlignments.Bottom | ParentAlignments.Left | ParentAlignments.Inner,
+            };
+            _levelEnter.Position += new Vector2I(0, -380);
+
+            new HudText(_levelEnter)
+            {
+                Padding = 20,
+                Text = "Enter Level Code",
+                TextAlignment = TextDrawOptions.Left,
+                ParentAlignment = ParentAlignments.Top | ParentAlignments.Left | ParentAlignments.InnerV,
+            };
+
+            _btnLevelGo = new HudTextButton(_levelEnter)
+            {
+                Bounds = new Vector2I(30, 30),
+                Text = "GO",
+                Padding = 10,
+                ParentAlignment = ParentAlignments.Right,
+            };
+            _btnLevelGo.OnLeftClicked += (e) =>
+            {
+                try
+                {
+                    uint val = Convert.ToUInt32(_levelEnter.Text.ToLower(), 16);
+                    _levelEnter.EmptyText = "Applied code";
+                    var x = WorldGenerationSystem.DecodeSeed(val);
+                    SetData(x.Item1, x.Item1, x.Item3);
+                } 
+                catch
+                {
+                    _levelEnter.EmptyText = "Invalid code";
+                }
+                _levelEnter.Text = "";
+            };
+
+            SetDifficulty(50, 128);
         }
 
-        private void SetDifficulty(byte checkpoints, float difficulty)
+        private void SetData(byte checkpoints, byte difficulty, ushort seed)
+        {
+            _sliderCheckpoints.ScrollbarPosition = checkpoints / (float)byte.MaxValue;
+            _sliderDifficulty.ScrollbarPosition = difficulty / (float)byte.MaxValue;
+            _sliderSeed.ScrollbarPosition = seed / (float)ushort.MaxValue;
+        }
+
+        private void SetDifficulty(byte checkpoints, byte difficulty)
         {
             Random random = new Random();
             _sliderCheckpoints.ScrollbarPosition = checkpoints / MAX_CHECKPOINTS;
-            _sliderDifficulty.ScrollbarPosition = difficulty;
+            _sliderDifficulty.ScrollbarPosition = difficulty / (float)byte.MaxValue;
             _sliderSeed.ScrollbarPosition = (float)random.NextDouble();
         }
 

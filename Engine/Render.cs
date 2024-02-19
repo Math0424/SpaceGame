@@ -221,7 +221,7 @@ namespace Project2.Engine
                         var createRt = ((RenderMessageCreateRT)message);
                         Console.WriteLine($"Creating render target {createRt.Name} : {createRt.Bounds}");
                         if (!_renderTargets.ContainsKey(createRt.Name))
-                            _renderTargets[createRt.Name] = new RenderTarget2D(_graphicsDevice, createRt.Bounds.X, createRt.Bounds.Y);
+                            _renderTargets[createRt.Name] = new RenderTarget2D(_graphicsDevice, createRt.Bounds.X, createRt.Bounds.Y, false, SurfaceFormat.Color, DepthFormat.None, 0, RenderTargetUsage.DiscardContents);
                         break;
                     case RenderMessageType.DisposeRT:
                         var disposeRt = ((RenderMessageDisposeRT)message);
@@ -237,7 +237,6 @@ namespace Project2.Engine
 
         private void OverlaySpriteRenderTarget(string texture)
         {
-            _graphicsDevice.SetRenderTarget(null);
             _spriteBatch.Begin();
             _spriteBatch.Draw(_renderTargets[texture], Vector2.Zero, Color.White);
             _spriteBatch.End();

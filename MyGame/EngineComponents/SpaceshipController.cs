@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Project2.MyGame.EngineComponents
@@ -53,7 +54,7 @@ namespace Project2.MyGame.EngineComponents
 
         public void Collision(int ent, int with, Vector3 pos, Vector3 normal, float val)
         {
-            if (ent == _physics.EntityId)
+            if (ent == _physics.EntityId || with == _physics.EntityId)
                 if (val > 3)
                     Health -= val / 600;
         }
@@ -89,7 +90,8 @@ namespace Project2.MyGame.EngineComponents
                 float xdelta = (mousePos.X - (bounds.Width / 2)) * delta * 3f;
                 float ydelta = (mousePos.Y - (bounds.Height / 2)) * delta * 3f;
 
-                Mouse.SetPosition(bounds.Width / 2, bounds.Height / 2);
+                //slow as shit, move to a thread, why not async :(
+                new Thread(() => { Mouse.SetPosition(bounds.Width / 2, bounds.Height / 2); }).Start();
 
                 _physics.AddTorque(pos.WorldMatrix.Left * ydelta * delta * ROTATION_SPEED);
                 _physics.AddTorque(pos.WorldMatrix.Down * xdelta * delta * ROTATION_SPEED);

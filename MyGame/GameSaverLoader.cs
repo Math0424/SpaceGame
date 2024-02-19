@@ -15,7 +15,7 @@ namespace Project2.MyGame
         {
             public long Time;
             public int Points;
-            public int LevelData;
+            public uint LevelData;
         }
 
         public unsafe static void SaveGame(Save save)

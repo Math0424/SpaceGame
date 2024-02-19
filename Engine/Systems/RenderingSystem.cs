@@ -33,6 +33,8 @@ namespace Project1.Engine.Systems
             Camera = camera;
             _world = world;
             Render.GraphicsReady += SetupCam;
+            if (Render.IsReady)
+                SetupCam();
         }
 
         private void SetupCam()
@@ -90,6 +92,7 @@ namespace Project1.Engine.Systems
 
         public override void Close()
         {
+            Render.GraphicsReady -= SetupCam;
         }
     }
 }

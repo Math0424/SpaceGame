@@ -156,7 +156,7 @@ namespace Project1.Engine.Systems.GUI
             Bounds = size;
         }
 
-        protected void UpdateParentAlignment()
+        public void UpdateParentAlignment()
         {
             if (Parent == null)
                 return;

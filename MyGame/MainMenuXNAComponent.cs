@@ -19,7 +19,7 @@ namespace Project1.MyGame
 {
     internal class MainMenuXNAComponent : GameComponent
     {
-        public Action<string, int> StartGame;
+        public Action<byte, byte, ushort> StartGame;
 
         private Game _game;
         private World _world;
@@ -30,39 +30,22 @@ namespace Project1.MyGame
             _world = new World(game)
                 .AddSystem<Camera>()
                 .AddSystem<RenderingSystem>()
-                .AddSystem<WorldGenerationSystem>()
-                .AddSystem<PhysicsSystem>()
-                .AddSystem<HudSystem>()
-                .AddSystem<GameStateManager>();
+                .AddSystem<HudSystem>();
             game.Components.Add(_world);
         }
 
         public override void Initialize()
         {
             var hud = _world.GetSystem<HudSystem>();
-            hud.RegisterElement(new MainMenuGUI(Render.ScreenBounds));
-
-            // var manager = _world.GetSystem<GameStateManager>();
-            // 
-            // var spaceship = _world.CreateEntity()
-            //     .AddComponent(new PositionComponent(Matrix.Identity))//, Matrix.CreateScale(0.01f)))
-            //     .AddComponent(new PrimitivePhysicsComponent(RigidBodyType.Sphere, 10))
-            //     .AddComponent(new SpaceshipController(Matrix.CreateTranslation(new Vector3(0, 0.4f, 0.7f))))
-            //     .AddComponent(new MeshComponent("Models/Cockpit", "Textures/Spaceship/CT", "Textures/Spaceship/ADD"))
-            //     .AddComponent(new MeshRenderingComponent())
-            //     .AddComponent(new MeshAnimationComponent());
-            // 
-            // hud.RegisterElement(new HudSpeed(spaceship, new Vector2I(256, 256), "info"));
-            // hud.RegisterElement(new HudInfo(manager, new Vector2I(256, 256), "dashboard"));
-            // hud.RegisterElement(new HudHealth(spaceship, new Vector2I(256, 256), "health"));
-            // 
-            // spaceship.GetComponent<MeshAnimationComponent>().LoadAnimation("openCockpit", "Animations/OpenCockpit.txt");
-            // 
-            // manager.CreateWorld(11, 1);
+            var gui = new MainMenuGUI(Render.ScreenBounds);
+            hud.RegisterElement(gui);
+            gui.StartGame += StartGame;
         }
 
         public override void Update(GameTime gameTime)
         {
+            if (_world.GetSystem<Camera>() == null)
+                return;
             var camera = _world.GetSystem<Camera>();
             float val = (float)gameTime.TotalGameTime.TotalSeconds / 100;
             Matrix rot = Matrix.CreateFromYawPitchRoll(0.001f, (float)Math.Sin(val) / 250, 0);
