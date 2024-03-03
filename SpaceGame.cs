@@ -1,16 +1,11 @@
 ﻿using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Project1.Engine;
-using Project1.Engine.Components;
 using Project1.Engine.Systems;
 using Project1.Engine.Systems.GUI;
 using Project1.MyGame;
 using Project2.Engine;
 using Project2.MyGame.EngineComponents;
-using System;
-using System.Collections.Generic;
-using System.IO;
 
 namespace Project1
 {
@@ -25,19 +20,6 @@ namespace Project1
 
             Render.Initalize(this);
             LoadMainMenu();
-
-            // Random r = new Random();
-            // for(int i = 0; i < 100; i++)
-            // {
-            //     byte a = (byte)(r.NextDouble() * byte.MaxValue);
-            //     byte b = (byte)(r.NextDouble() * byte.MaxValue);
-            //     ushort c = (ushort)(r.NextDouble() * ushort.MaxValue);
-            //     uint seed = WorldGenerationSystem.CreateSeed(a, b, c);
-            //     var x = WorldGenerationSystem.DecodeSeed(seed);
-            //     if (a != x.Item1 || b != x.Item2 || c != x.Item3)
-            //         Console.WriteLine($"Error input {a}:{b}:{c} -> {x.Item1}:{x.Item2}:{x.Item3}");
-            // }
-
         }
 
         public void LoadMainMenu()
